@@ -161,9 +161,12 @@
 //   }
 // }
 
-
 import 'package:chat/services/auth_service.dart';
+import 'package:chat/services/navigation_service.dart';
+import 'package:delightful_toast/delight_toast.dart';
+import 'package:delightful_toast/toast/components/toast_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:get_it/get_it.dart';
 
 class Login extends StatefulWidget {
@@ -173,6 +176,8 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final GetIt _getIt = GetIt.instance;
+  late NavigationService _navigationService;
   final GlobalKey<FormState> _loginFormKey = GlobalKey();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -182,7 +187,9 @@ class _LoginState extends State<Login> {
   @override
   void initState() {
     super.initState();
-    _authService = GetIt.I<AuthService>(); // Using GetIt to get the instance of AuthService
+    _authService = GetIt.I<
+        AuthService>(); // Using GetIt to get the instance of AuthService
+    _navigationService = _getIt.get<NavigationService>();
   }
 
   @override
@@ -307,13 +314,34 @@ class _LoginState extends State<Login> {
             password = _passwordController.text;
             bool success = await _authService.login(email!, password!);
             if (success) {
-              // Navigate to the next screen or show success message
-              print("Login Successful");
-            } else {
-              // Show error message
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Login failed. Please try again.')),
+              showToast('You have logged in!',
+                context: context,
+                animation: StyledToastAnimation.scale,
+                reverseAnimation: StyledToastAnimation.fade,
+                position: StyledToastPosition.bottom,
+                animDuration: Duration(seconds: 1),
+                duration: Duration(seconds: 4),
+                curve: Curves.elasticOut,
+                reverseCurve: Curves.linear,
               );
+              _navigationService.pushReplacementNamed("/home");
+            } else {
+              DelightToastBar(
+                builder: (context) => const ToastCard(
+                  leading: Icon(
+                    Icons.flutter_dash,
+                    size: 28,
+                  ),
+                  title: Text(
+                    "Error login. Try again !",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ).show(context);
+
             }
           }
         },

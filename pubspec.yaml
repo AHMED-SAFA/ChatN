@@ -26,6 +26,7 @@ dependencies:
   google_fonts: ^6.2.1
   firebase_analytics: ^11.2.1
   delightful_toast: ^1.1.0
+  flutter_styled_toast: ^2.2.1
   path: ^1.9.0
   image_picker: ^1.1.2
 

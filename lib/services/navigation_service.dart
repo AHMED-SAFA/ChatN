@@ -20,4 +20,15 @@ class NavigationService {
   NavigationService() {
     _navigatorKey = GlobalKey<NavigatorState>();
   }
+  void pushNamed(String routeName) {
+    _navigatorKey.currentState?.pushNamed(routeName);
+  }
+
+  void pushReplacementNamed(String routeName) {
+    _navigatorKey.currentState?.pushReplacementNamed(routeName);
+  }
+
+  void goBack() {
+    _navigatorKey.currentState?.pop();
+  }
 }

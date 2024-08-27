@@ -1,5 +1,6 @@
 import 'package:chat/pages/home_page.dart';
 import 'package:chat/pages/login_page.dart';
+import 'package:chat/pages/register_page.dart';
 import 'package:flutter/material.dart';
 
 class NavigationService {
@@ -7,6 +8,7 @@ class NavigationService {
   final Map<String, Widget Function(BuildContext)> _routes = {
     "/login": (context) => Login(),
     "/home": (context) => Home(),
+    "/register": (context) => RegisterPage(),
   };
 
   GlobalKey<NavigatorState>? get navigatorKey {

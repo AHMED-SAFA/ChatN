@@ -1,25 +1,27 @@
-import 'package:chat/services/auth_service.dart';
-import 'package:chat/services/navigation_service.dart';
 import 'package:delightful_toast/delight_toast.dart';
 import 'package:delightful_toast/toast/components/toast_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:get_it/get_it.dart';
+import '../services/auth_service.dart';
+import '../services/navigation_service.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
   @override
-  State<Login> createState() => _LoginState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginState extends State<Login> {
+class _RegisterPageState extends State<RegisterPage> {
+
   final GetIt _getIt = GetIt.instance;
   late NavigationService _navigationService;
   final GlobalKey<FormState> _loginFormKey = GlobalKey();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   late AuthService _authService;
-  String? email, password;
+  String? email,password;
 
   @override
   void initState() {
@@ -28,46 +30,26 @@ class _LoginState extends State<Login> {
     _navigationService = _getIt.get<NavigationService>();
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: _buildLoginUI(),
+      appBar: AppBar(
+        title: Text("Register",),
+      ),
+      body: _regUI(),
     );
   }
 
-  Widget _buildLoginUI() {
+  Widget _regUI(){
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
         child: Column(
           children: [
-            _headerText(),
             _formField(),
-            _regButtonText(),
+            _loginButtonText(),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _headerText() {
-    return SizedBox(
-      width: MediaQuery.sizeOf(context).width,
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Hello, Welcome",
-            style: TextStyle(
-              fontSize: 30,
-              color: Colors.black,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -85,6 +67,17 @@ class _LoginState extends State<Login> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
+            _buildFormField(
+              controller: _emailController,
+              labelText: 'Name',
+              hintText: 'Enter your name',
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your name';
+                }
+                return null;
+              },
+            ),
             _buildFormField(
               controller: _emailController,
               labelText: 'Email',
@@ -114,7 +107,7 @@ class _LoginState extends State<Login> {
                 return null;
               },
             ),
-            _loginButton(),
+            _registerButton(),
           ],
         ),
       ),
@@ -140,7 +133,7 @@ class _LoginState extends State<Login> {
     );
   }
 
-  Widget _loginButton() {
+  Widget _registerButton() {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
       child: MaterialButton(
@@ -151,7 +144,7 @@ class _LoginState extends State<Login> {
             bool success = await _authService.login(email!, password!);
             if (success) {
               showToast(
-                'You have logged in!',
+                'You have registered!',
                 context: context,
                 animation: StyledToastAnimation.scale,
                 reverseAnimation: StyledToastAnimation.fade,
@@ -161,8 +154,9 @@ class _LoginState extends State<Login> {
                 curve: Curves.elasticOut,
                 reverseCurve: Curves.linear,
               );
-              _navigationService.pushReplacementNamed("/home");
-            } else {
+              _navigationService.pushReplacementNamed("/login");
+            }
+            else {
               DelightToastBar(
                 builder: (context) => const ToastCard(
                   leading: Icon(
@@ -170,7 +164,7 @@ class _LoginState extends State<Login> {
                     size: 28,
                   ),
                   title: Text(
-                    "Error login. Try again !",
+                    "Register error. Try again !",
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -183,7 +177,7 @@ class _LoginState extends State<Login> {
         },
         color: Theme.of(context).colorScheme.primary,
         child: Text(
-          "Login",
+          "Register",
           style: TextStyle(
             fontSize: 20,
             color: Colors.white,
@@ -193,7 +187,7 @@ class _LoginState extends State<Login> {
     );
   }
 
-  Widget _regButtonText() {
+  Widget _loginButtonText() {
     return Expanded(
       child: Row(
         mainAxisSize: MainAxisSize.max,
@@ -202,10 +196,10 @@ class _LoginState extends State<Login> {
           Text("New Here? ", style: TextStyle(fontSize: 18)),
           GestureDetector(
             onTap: () {
-              _navigationService.pushNamed("/register");
+              _navigationService.pushNamed("/login");
             },
             child: const Text(
-              "SignUp",
+              "Login",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -217,4 +211,5 @@ class _LoginState extends State<Login> {
       ),
     );
   }
+
 }

@@ -23,6 +23,8 @@ dependencies:
   dash_chat_2: ^0.0.21
   firebase_storage: ^12.1.3
   cloud_firestore: ^5.2.1
+  firebase_database: ^11.1.0
+  uuid: ^3.0.6
   google_fonts: ^6.2.1
   firebase_analytics: ^11.2.1
   delightful_toast: ^1.1.0

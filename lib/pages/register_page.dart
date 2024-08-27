@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:delightful_toast/delight_toast.dart';
 import 'package:delightful_toast/toast/components/toast_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:get_it/get_it.dart';
 import '../services/auth_service.dart';
+import '../services/media_service.dart';
 import '../services/navigation_service.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -14,40 +17,48 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-
+  File? selectedImage;
+  String avatar =
+      "https://w7.pngwing.com/pngs/867/694/png-transparent-user-profile-default-computer-icons-network-video-recorder-avatar-cartoon-maker-blue-text-logo-thumbnail.png";
   final GetIt _getIt = GetIt.instance;
   late NavigationService _navigationService;
-  final GlobalKey<FormState> _loginFormKey = GlobalKey();
+  final GlobalKey<FormState> _regFormKey = GlobalKey();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   late AuthService _authService;
-  String? email,password;
+  late MediaService _mediaService;
+  String? email, password,name ;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _authService = GetIt.I<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
+    _mediaService = _getIt.get<MediaService>();
   }
 
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text("Register",),
+        title: Text(
+          "Register",
+        ),
       ),
       body: _regUI(),
     );
   }
 
-  Widget _regUI(){
+  Widget _regUI() {
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
         child: Column(
           children: [
-            _formField(),
-            _loginButtonText(),
+            if(!isLoading)_formField(),
+            if(!isLoading)_loginButtonText(),
           ],
         ),
       ),
@@ -56,19 +67,22 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget _formField() {
     return Container(
-      height: MediaQuery.sizeOf(context).height * 0.40,
       margin: EdgeInsets.symmetric(
         vertical: MediaQuery.sizeOf(context).height * 0.05,
       ),
       child: Form(
-        key: _loginFormKey,
+        key: _regFormKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
+            _imagePicker(),
+            SizedBox(
+              height: 30,
+            ),
             _buildFormField(
-              controller: _emailController,
+              controller: _nameController,
               labelText: 'Name',
               hintText: 'Enter your name',
               validator: (value) {
@@ -77,6 +91,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 }
                 return null;
               },
+            ),
+            SizedBox(
+              height: 15,
             ),
             _buildFormField(
               controller: _emailController,
@@ -92,6 +109,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 return null;
               },
             ),
+            SizedBox(
+              height: 15,
+            ),
             _buildFormField(
               controller: _passwordController,
               labelText: 'Password',
@@ -106,6 +126,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 }
                 return null;
               },
+            ),
+            SizedBox(
+              height: 15,
             ),
             _registerButton(),
           ],
@@ -138,11 +161,23 @@ class _RegisterPageState extends State<RegisterPage> {
       width: MediaQuery.sizeOf(context).width,
       child: MaterialButton(
         onPressed: () async {
-          if (_loginFormKey.currentState?.validate() ?? false) {
-            email = _emailController.text;
-            password = _passwordController.text;
-            bool success = await _authService.login(email!, password!);
-            if (success) {
+          if (_regFormKey.currentState?.validate() ?? false && selectedImage != null) {
+            try {
+              email = _emailController.text;
+              password = _passwordController.text;
+              name = _nameController.text;
+
+              //auth
+              UserCredential userCredential = await _authService.register(email!, password!);
+              String? userId = userCredential.user?.uid;
+
+              //firebase storage
+              String? imageUrl;
+              if (selectedImage != null && userId != null) {
+                imageUrl = await _mediaService.uploadImageToStorage(selectedImage!, userId);
+              }
+
+
               showToast(
                 'You have registered!',
                 context: context,
@@ -154,17 +189,19 @@ class _RegisterPageState extends State<RegisterPage> {
                 curve: Curves.elasticOut,
                 reverseCurve: Curves.linear,
               );
-              _navigationService.pushReplacementNamed("/login");
-            }
-            else {
+
+              _navigationService.pushReplacementNamed("/home");
+
+            } catch (error) {
+              // Show error toast
               DelightToastBar(
                 builder: (context) => const ToastCard(
                   leading: Icon(
-                    Icons.flutter_dash,
+                    Icons.error,
                     size: 28,
                   ),
                   title: Text(
-                    "Register error. Try again !",
+                    "Registration error. Try again!",
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -196,7 +233,7 @@ class _RegisterPageState extends State<RegisterPage> {
           Text("New Here? ", style: TextStyle(fontSize: 18)),
           GestureDetector(
             onTap: () {
-              _navigationService.pushNamed("/login");
+              _navigationService.goBack();
             },
             child: const Text(
               "Login",
@@ -212,4 +249,74 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  Widget _imagePicker() {
+    return GestureDetector(
+      onTap: () async{
+        File? file =  await _mediaService.getImageFromGallery();
+        if(file != null){
+          setState(() {
+            selectedImage = file;
+          });
+        }
+      },
+      child: CircleAvatar(
+        radius: 64,
+        backgroundImage: selectedImage != null
+            ? FileImage(selectedImage!)
+            : NetworkImage(avatar) as ImageProvider,
+      ),
+    );
+  }
 }
+
+
+// SizedBox(
+// width: MediaQuery.sizeOf(context).width,
+// child: MaterialButton(
+// onPressed: () async {
+// if (_loginFormKey.currentState?.validate() ?? false) {
+// email = _emailController.text;
+// password = _passwordController.text;
+// bool success = await _authService.login(email!, password!);
+// if (success) {
+// showToast(
+// 'You have registered!',
+// context: context,
+// animation: StyledToastAnimation.scale,
+// reverseAnimation: StyledToastAnimation.fade,
+// position: StyledToastPosition.bottom,
+// animDuration: Duration(seconds: 1),
+// duration: Duration(seconds: 4),
+// curve: Curves.elasticOut,
+// reverseCurve: Curves.linear,
+// );
+// _navigationService.pushReplacementNamed("/login");
+// } else {
+// DelightToastBar(
+// builder: (context) => const ToastCard(
+// leading: Icon(
+// Icons.flutter_dash,
+// size: 28,
+// ),
+// title: Text(
+// "Register error. Try again !",
+// style: TextStyle(
+// fontWeight: FontWeight.w700,
+// fontSize: 14,
+// ),
+// ),
+// ),
+// ).show(context);
+// }
+// }
+// },
+// color: Theme.of(context).colorScheme.primary,
+// child: Text(
+// "Register",
+// style: TextStyle(
+// fontSize: 20,
+// color: Colors.white,
+// ),
+// ),
+// ),
+// );

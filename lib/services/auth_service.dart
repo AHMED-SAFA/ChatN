@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref();
   User? _user;
 
   User? get user {
@@ -41,5 +43,13 @@ class AuthService {
       print(e);
     }
     return false;
+  }
+
+  //auth registration
+  Future<UserCredential> register(String email, String password) async {
+    return await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 }

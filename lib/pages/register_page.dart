@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:chat/services/cloud_service.dart';
 import 'package:delightful_toast/delight_toast.dart';
 import 'package:delightful_toast/toast/components/toast_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,6 +22,7 @@ class _RegisterPageState extends State<RegisterPage> {
   String avatar =
       "https://w7.pngwing.com/pngs/867/694/png-transparent-user-profile-default-computer-icons-network-video-recorder-avatar-cartoon-maker-blue-text-logo-thumbnail.png";
   final GetIt _getIt = GetIt.instance;
+  late CloudService _cloudService;
   late NavigationService _navigationService;
   final GlobalKey<FormState> _regFormKey = GlobalKey();
   final TextEditingController _emailController = TextEditingController();
@@ -28,7 +30,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   late AuthService _authService;
   late MediaService _mediaService;
-  String? email, password,name ;
+  String? email, password, name;
   bool isLoading = false;
 
   @override
@@ -37,6 +39,7 @@ class _RegisterPageState extends State<RegisterPage> {
     _authService = GetIt.I<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
     _mediaService = _getIt.get<MediaService>();
+    _cloudService = _getIt.get<CloudService>();
   }
 
   Widget build(BuildContext context) {
@@ -57,8 +60,14 @@ class _RegisterPageState extends State<RegisterPage> {
         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
         child: Column(
           children: [
-            if(!isLoading)_formField(),
-            if(!isLoading)_loginButtonText(),
+            if (!isLoading) _formField(),
+            if (!isLoading) _loginButtonText(),
+            if (isLoading)
+              const Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
           ],
         ),
       ),
@@ -156,27 +165,168 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  // Widget _registerButton() {
+  //   return SizedBox(
+  //     width: MediaQuery.sizeOf(context).width,
+  //     child: MaterialButton(
+  //       onPressed: () async {
+  //         if (_regFormKey.currentState?.validate() ?? false) {
+  //           if (selectedImage == null) {
+  //             DelightToastBar(
+  //               builder: (context) => const ToastCard(
+  //                 leading: Icon(
+  //                   Icons.warning,
+  //                   size: 28,
+  //                 ),
+  //                 title: Text(
+  //                   "Please select an image!",
+  //                   style: TextStyle(
+  //                     fontWeight: FontWeight.w700,
+  //                     fontSize: 14,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ).show(context);
+  //             return;
+  //           }
+  //
+  //           setState(() {
+  //             isLoading = true;
+  //           });
+  //
+  //           try {
+  //             email = _emailController.text;
+  //             password = _passwordController.text;
+  //             name = _nameController.text;
+  //
+  //             // Firebase Authentication
+  //             UserCredential userCredential =
+  //                 await _authService.register(email!, password!);
+  //
+  //             String? userId = userCredential.user?.uid;
+  //
+  //             // Upload image to Firebase Storage
+  //             String? imageUrl;
+  //             if (userId != null) {
+  //               imageUrl = await _mediaService.uploadImageToStorage(
+  //                   selectedImage!, userId);
+  //
+  //               // user profile in Firestore
+  //               UserProfile userProfile = UserProfile(
+  //                 userId: userId,
+  //                 // userId: _authService.user!.uid,
+  //                 name: name!,
+  //                 profileImageUrl: imageUrl,
+  //               );
+  //               await _cloudService.createUserProfile(userProfile: userProfile);
+  //             }
+  //
+  //             showToast(
+  //               'You have registered!',
+  //               context: context,
+  //               animation: StyledToastAnimation.scale,
+  //               reverseAnimation: StyledToastAnimation.fade,
+  //               position: StyledToastPosition.bottom,
+  //               animDuration: Duration(seconds: 1),
+  //               duration: Duration(seconds: 4),
+  //               curve: Curves.elasticOut,
+  //               reverseCurve: Curves.linear,
+  //             );
+  //             _navigationService.pushReplacementNamed("/home");
+  //           } catch (error) {
+  //             DelightToastBar(
+  //               builder: (context) => const ToastCard(
+  //                 leading: Icon(
+  //                   Icons.error,
+  //                   size: 28,
+  //                 ),
+  //                 title: Text(
+  //                   "Registration error. Try again!",
+  //                   style: TextStyle(
+  //                     fontWeight: FontWeight.w700,
+  //                     fontSize: 14,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ).show(context);
+  //           } finally {
+  //             setState(() {
+  //               isLoading = false;
+  //             });
+  //           }
+  //         }
+  //       },
+  //       color: Theme.of(context).colorScheme.primary,
+  //       child: Text(
+  //         "Register",
+  //         style: TextStyle(
+  //           fontSize: 20,
+  //           color: Colors.white,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget _registerButton() {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
       child: MaterialButton(
         onPressed: () async {
-          if (_regFormKey.currentState?.validate() ?? false && selectedImage != null) {
+          if (_regFormKey.currentState?.validate() ?? false) {
+            if (selectedImage == null) {
+              DelightToastBar(
+                builder: (context) => const ToastCard(
+                  leading: Icon(
+                    Icons.warning,
+                    size: 28,
+                  ),
+                  title: Text(
+                    "Please select an image!",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ).show(context);
+              return;
+            }
+
+            setState(() {
+              isLoading = true;
+            });
+
             try {
               email = _emailController.text;
               password = _passwordController.text;
               name = _nameController.text;
 
-              //auth
-              UserCredential userCredential = await _authService.register(email!, password!);
+              // Firebase Authentication
+              UserCredential userCredential =
+                  await _authService.register(email!, password!);
+
               String? userId = userCredential.user?.uid;
 
-              //firebase storage
-              String? imageUrl;
-              if (selectedImage != null && userId != null) {
-                imageUrl = await _mediaService.uploadImageToStorage(selectedImage!, userId);
-              }
+              // Upload image to Firebase Storage
 
+              String? imageUrl = await _mediaService.uploadImageToStorage(
+                  selectedImage!, userId!);
+
+              // Store user data in Firestore
+              await _cloudService.storeUserData(
+                userId: userId,
+                name: name!,
+                profileImageUrl: imageUrl!,
+              );
+
+              // Store user data in Realtime Database
+              await _cloudService.storeUserDataInRealtimeDatabase(
+                userId: userId!,
+                name: name!,
+                email: email!,
+                password: password!,
+              );
 
               showToast(
                 'You have registered!',
@@ -189,11 +339,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 curve: Curves.elasticOut,
                 reverseCurve: Curves.linear,
               );
-
               _navigationService.pushReplacementNamed("/home");
-
             } catch (error) {
-              // Show error toast
               DelightToastBar(
                 builder: (context) => const ToastCard(
                   leading: Icon(
@@ -209,6 +356,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ).show(context);
+            } finally {
+              setState(() {
+                isLoading = false;
+              });
             }
           }
         },
@@ -230,7 +381,7 @@ class _RegisterPageState extends State<RegisterPage> {
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("New Here? ", style: TextStyle(fontSize: 18)),
+          const Text("Already familiar? ", style: TextStyle(fontSize: 18)),
           GestureDetector(
             onTap: () {
               _navigationService.goBack();
@@ -251,9 +402,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget _imagePicker() {
     return GestureDetector(
-      onTap: () async{
-        File? file =  await _mediaService.getImageFromGallery();
-        if(file != null){
+      onTap: () async {
+        File? file = await _mediaService.getImageFromGallery();
+        if (file != null) {
           setState(() {
             selectedImage = file;
           });
@@ -268,55 +419,3 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-
-
-// SizedBox(
-// width: MediaQuery.sizeOf(context).width,
-// child: MaterialButton(
-// onPressed: () async {
-// if (_loginFormKey.currentState?.validate() ?? false) {
-// email = _emailController.text;
-// password = _passwordController.text;
-// bool success = await _authService.login(email!, password!);
-// if (success) {
-// showToast(
-// 'You have registered!',
-// context: context,
-// animation: StyledToastAnimation.scale,
-// reverseAnimation: StyledToastAnimation.fade,
-// position: StyledToastPosition.bottom,
-// animDuration: Duration(seconds: 1),
-// duration: Duration(seconds: 4),
-// curve: Curves.elasticOut,
-// reverseCurve: Curves.linear,
-// );
-// _navigationService.pushReplacementNamed("/login");
-// } else {
-// DelightToastBar(
-// builder: (context) => const ToastCard(
-// leading: Icon(
-// Icons.flutter_dash,
-// size: 28,
-// ),
-// title: Text(
-// "Register error. Try again !",
-// style: TextStyle(
-// fontWeight: FontWeight.w700,
-// fontSize: 14,
-// ),
-// ),
-// ),
-// ).show(context);
-// }
-// }
-// },
-// color: Theme.of(context).colorScheme.primary,
-// child: Text(
-// "Register",
-// style: TextStyle(
-// fontSize: 20,
-// color: Colors.white,
-// ),
-// ),
-// ),
-// );

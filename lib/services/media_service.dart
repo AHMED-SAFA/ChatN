@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
 
 class MediaService {
   final ImagePicker _imagePicker = ImagePicker();
+  final FirebaseStorage firebaseStorage = FirebaseStorage.instance;
 
   MediaService() {}
 
@@ -15,11 +17,8 @@ class MediaService {
   }
 
 
-
-
-
   Future<String> uploadImageToStorage(File image, String userId) async {
-    Reference ref = FirebaseStorage.instance.ref().child('user_images/$userId.jpg');
+    Reference ref = firebaseStorage.ref('users/profile_images').child('$userId${p.extension(image.path)}');
     UploadTask uploadTask = ref.putFile(image);
     TaskSnapshot snapshot = await uploadTask;
     return await snapshot.ref.getDownloadURL();

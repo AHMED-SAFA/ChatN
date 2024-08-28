@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 class CloudService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -34,4 +33,26 @@ class CloudService {
       'password': password,
     });
   }
+
+  Future<List<Map<String, dynamic>>> fetchRegisteredUsers({
+    required String loggedInUserId,
+  }) async {
+    QuerySnapshot snapshot = await _firestore.collection('users').get();
+    List<Map<String, dynamic>> users = [];
+
+    for (var doc in snapshot.docs) {
+      Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
+      if (userData['userId'] != loggedInUserId) {
+        users.add({
+          'name': userData['name'],
+          'profileImageUrl': userData['profileImageUrl'],
+          'userId': userData['userId'],
+        });
+      }
+    }
+
+    return users;
+  }
+
+
 }

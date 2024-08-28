@@ -165,109 +165,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // Widget _registerButton() {
-  //   return SizedBox(
-  //     width: MediaQuery.sizeOf(context).width,
-  //     child: MaterialButton(
-  //       onPressed: () async {
-  //         if (_regFormKey.currentState?.validate() ?? false) {
-  //           if (selectedImage == null) {
-  //             DelightToastBar(
-  //               builder: (context) => const ToastCard(
-  //                 leading: Icon(
-  //                   Icons.warning,
-  //                   size: 28,
-  //                 ),
-  //                 title: Text(
-  //                   "Please select an image!",
-  //                   style: TextStyle(
-  //                     fontWeight: FontWeight.w700,
-  //                     fontSize: 14,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ).show(context);
-  //             return;
-  //           }
-  //
-  //           setState(() {
-  //             isLoading = true;
-  //           });
-  //
-  //           try {
-  //             email = _emailController.text;
-  //             password = _passwordController.text;
-  //             name = _nameController.text;
-  //
-  //             // Firebase Authentication
-  //             UserCredential userCredential =
-  //                 await _authService.register(email!, password!);
-  //
-  //             String? userId = userCredential.user?.uid;
-  //
-  //             // Upload image to Firebase Storage
-  //             String? imageUrl;
-  //             if (userId != null) {
-  //               imageUrl = await _mediaService.uploadImageToStorage(
-  //                   selectedImage!, userId);
-  //
-  //               // user profile in Firestore
-  //               UserProfile userProfile = UserProfile(
-  //                 userId: userId,
-  //                 // userId: _authService.user!.uid,
-  //                 name: name!,
-  //                 profileImageUrl: imageUrl,
-  //               );
-  //               await _cloudService.createUserProfile(userProfile: userProfile);
-  //             }
-  //
-  //             showToast(
-  //               'You have registered!',
-  //               context: context,
-  //               animation: StyledToastAnimation.scale,
-  //               reverseAnimation: StyledToastAnimation.fade,
-  //               position: StyledToastPosition.bottom,
-  //               animDuration: Duration(seconds: 1),
-  //               duration: Duration(seconds: 4),
-  //               curve: Curves.elasticOut,
-  //               reverseCurve: Curves.linear,
-  //             );
-  //             _navigationService.pushReplacementNamed("/home");
-  //           } catch (error) {
-  //             DelightToastBar(
-  //               builder: (context) => const ToastCard(
-  //                 leading: Icon(
-  //                   Icons.error,
-  //                   size: 28,
-  //                 ),
-  //                 title: Text(
-  //                   "Registration error. Try again!",
-  //                   style: TextStyle(
-  //                     fontWeight: FontWeight.w700,
-  //                     fontSize: 14,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ).show(context);
-  //           } finally {
-  //             setState(() {
-  //               isLoading = false;
-  //             });
-  //           }
-  //         }
-  //       },
-  //       color: Theme.of(context).colorScheme.primary,
-  //       child: Text(
-  //         "Register",
-  //         style: TextStyle(
-  //           fontSize: 20,
-  //           color: Colors.white,
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget _registerButton() {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
@@ -309,7 +206,6 @@ class _RegisterPageState extends State<RegisterPage> {
               String? userId = userCredential.user?.uid;
 
               // Upload image to Firebase Storage
-
               String? imageUrl = await _mediaService.uploadImageToStorage(
                   selectedImage!, userId!);
 

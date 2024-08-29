@@ -1,9 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delightful_toast/delight_toast.dart';
+import 'package:delightful_toast/toast/components/toast_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 
 class CloudService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseDatabase _realtimeDb = FirebaseDatabase.instance;
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
 
   Future<void> storeUserData({
     required String userId,
@@ -54,5 +63,49 @@ class CloudService {
     return users;
   }
 
+  Future<Map<String, dynamic>?> fetchUserData({required String userId}) async {
+    try {
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        return userDoc.data() as Map<String, dynamic>?;
+      }
+    } catch (e) {
+      print("Error fetching user data: $e");
+    }
+    return null;
+  }
 
+  Future<void> deleteUserAccount(String userId) async {
+    try {
+      // Fetch user data first to get profile image URL
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        Map<String, dynamic>? userData =
+            userDoc.data() as Map<String, dynamic>?;
+        if (userData != null && userData.containsKey('profileImageUrl')) {
+          String profileImageUrl = userData['profileImageUrl'];
+
+          // Delete the profile image from Firebase Storage
+          Reference storageRef = _firebaseStorage.refFromURL(profileImageUrl);
+          await storageRef.delete();
+        }
+      }
+
+      // Delete user data from Firestore
+      await _firestore.collection('users').doc(userId).delete();
+
+      // Delete user data from Realtime Database
+      await _realtimeDb.ref().child('users/$userId').remove();
+
+      // Delete Firebase Authentication account
+      User? user = _firebaseAuth.currentUser;
+      if (user != null && user.uid == userId) await user.delete();
+
+
+    } catch (e) {
+      print("Error deleting user account: $e");
+    }
+  }
 }

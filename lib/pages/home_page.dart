@@ -1,5 +1,8 @@
 import 'package:chat/services/auth_service.dart';
 import 'package:chat/services/navigation_service.dart';
+import 'package:delightful_toast/delight_toast.dart';
+import 'package:delightful_toast/toast/components/toast_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
@@ -18,6 +21,7 @@ class _HomeState extends State<Home> {
   late NavigationService _navigationService;
   late CloudService _cloudService;
   late String _loggedInUserId;
+  Map<String, dynamic>? _loggedInUserData;
   List<Map<String, dynamic>> _users = [];
 
   @override
@@ -28,6 +32,7 @@ class _HomeState extends State<Home> {
     _cloudService = _getIt.get<CloudService>();
     _loggedInUserId = _authService.user!.uid;
     _fetchUsers();
+    _fetchLoggedInUserData();
   }
 
   Future<void> _fetchUsers() async {
@@ -38,6 +43,12 @@ class _HomeState extends State<Home> {
 
   Future<void> _refreshUsers() async {
     await _fetchUsers();
+  }
+
+  Future<void> _fetchLoggedInUserData() async {
+    _loggedInUserData =
+        await _cloudService.fetchUserData(userId: _loggedInUserId);
+    setState(() {});
   }
 
   @override
@@ -56,7 +67,7 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      drawer: _buildDrawer(), // Add the drawer here
+      drawer: _buildDrawer(),
       body: _homeUI(),
     );
   }
@@ -66,18 +77,23 @@ class _HomeState extends State<Home> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
+          DrawerHeader(
+            decoration: const BoxDecoration(
               color: Colors.black,
             ),
-            child: Center(
-              child: Text(
-                'ChatN',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  _loggedInUserData != null
+                      ? "Welcome ${_loggedInUserData!['name']}"
+                      : 'Person',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
           ListTile(
@@ -101,6 +117,32 @@ class _HomeState extends State<Home> {
               bool result = await _authService.logout();
               if (result) {
                 _navigationService.pushReplacementNamed("/login");
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.cancel_presentation_outlined),
+            title: const Text('Delete account'),
+            onTap: () async {
+              User? user = FirebaseAuth.instance.currentUser;
+              if (user != null) {
+                await _cloudService.deleteUserAccount(user.uid);
+                _navigationService.pushReplacementNamed("/login");
+                DelightToastBar(
+                  builder: (context) => const ToastCard(
+                    leading: Icon(
+                      Icons.offline_pin_rounded,
+                      size: 28,
+                    ),
+                    title: Text(
+                      "Your account removed successfully",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ).show(context);
               }
             },
           ),
@@ -140,21 +182,4 @@ class _HomeState extends State<Home> {
             ),
     );
   }
-  //   if (_users.isEmpty) {
-  //     return const Center(child: Text('No users found.'));
-  //   }
-  //
-  //   return ListView.builder(
-  //     itemCount: _users.length,
-  //     itemBuilder: (context, index) {
-  //       final user = _users[index];
-  //       return ListTile(
-  //         leading: CircleAvatar(
-  //           backgroundImage: NetworkImage(user['profileImageUrl']),
-  //         ),
-  //         title: Text(user['name']),
-  //       );
-  //     },
-  //   );
-  // }
 }

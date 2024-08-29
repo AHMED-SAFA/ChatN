@@ -5,7 +5,7 @@ import 'package:delightful_toast/toast/components/toast_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-
+import '../services/chat_service.dart';
 import '../services/cloud_service.dart';
 
 class Home extends StatefulWidget {
@@ -20,6 +20,7 @@ class _HomeState extends State<Home> {
   late AuthService _authService;
   late NavigationService _navigationService;
   late CloudService _cloudService;
+  late ChatService _chatService;
   late String _loggedInUserId;
   Map<String, dynamic>? _loggedInUserData;
   List<Map<String, dynamic>> _users = [];
@@ -30,6 +31,7 @@ class _HomeState extends State<Home> {
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
     _cloudService = _getIt.get<CloudService>();
+    _chatService = _getIt.get<ChatService>();
     _loggedInUserId = _authService.user!.uid;
     _fetchUsers();
     _fetchLoggedInUserData();
@@ -177,6 +179,14 @@ class _HomeState extends State<Home> {
                     backgroundImage: NetworkImage(user['profileImageUrl']),
                   ),
                   title: Text(user['name']),
+                  onTap: () async {
+                    await _chatService.createOrGetChat(
+                      userId1: _loggedInUserId,
+                      name1: _loggedInUserData!['name'],
+                      userId2: user['userId'],
+                      name2: user['name'],
+                    );
+                  },
                 );
               },
             ),

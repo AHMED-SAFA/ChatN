@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../services/chat_service.dart';
 import '../services/cloud_service.dart';
+import 'chat_page.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -61,11 +62,8 @@ class _HomeState extends State<Home> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              bool result = await _authService.logout();
-              if (result) _navigationService.pushReplacementNamed("/login");
-            },
+            icon: const Icon(Icons.notifications),
+            onPressed: () {},
           ),
         ],
       ),
@@ -180,11 +178,24 @@ class _HomeState extends State<Home> {
                   ),
                   title: Text(user['name']),
                   onTap: () async {
-                    await _chatService.createOrGetChat(
+                    String chatId = await _chatService.createOrGetChat(
                       userId1: _loggedInUserId,
                       name1: _loggedInUserData!['name'],
                       userId2: user['userId'],
                       name2: user['name'],
+                    );
+
+                    // Navigate to ChatPage with the captured chatId
+                    _navigationService.push(
+                      MaterialPageRoute(
+                        builder: (context) => ChatPage(
+                          loggedInUserName: _loggedInUserData!['name'],
+                          otherUserName: user['name'],
+                          chatId: chatId,
+                          currentUserId: _loggedInUserId,
+                          otherUserId: user['userId'],
+                        ),
+                      ),
                     );
                   },
                 );

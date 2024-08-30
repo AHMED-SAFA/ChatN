@@ -29,15 +29,44 @@ class _ChatPageState extends State<ChatPage> {
   late AuthService _authService;
   final GetIt _getIt = GetIt.instance;
   ChatUser? currentUser, otherUser;
+  List<ChatMessage> messages = [];
 
   @override
   void initState() {
     super.initState();
     _authService = _getIt.get<AuthService>();
     currentUser = ChatUser(
-        id: _authService.user!.uid, firstName: _authService.user!.displayName);
-    otherUser =
-        ChatUser(id: widget.otherUserId, firstName: widget.otherUserName);
+      id: _authService.user!.uid,
+      firstName: _authService.user!.displayName,
+    );
+    otherUser = ChatUser(
+      id: widget.otherUserId,
+      firstName: widget.otherUserName,
+    );
+    _loadMessages();
+  }
+
+  void _loadMessages() {
+    FirebaseFirestore.instance
+        .collection('chats')
+        .doc(widget.chatId)
+        .collection('messages')
+        .orderBy('sentAt', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+      setState(() {
+        messages = snapshot.docs.map((doc) {
+          final messageData = doc.data();
+          return ChatMessage(
+            user: messageData['senderID'] == currentUser!.id
+                ? currentUser!
+                : otherUser!,
+            text: messageData['content'],
+            createdAt: (messageData['sentAt'] as Timestamp).toDate(),
+          );
+        }).toList();
+      });
+    });
   }
 
   @override
@@ -52,20 +81,27 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _chatUI() {
     return DashChat(
-      messageOptions: const MessageOptions(showTime: true),
-      inputOptions: const InputOptions(alwaysShowSend: true),
       currentUser: currentUser!,
       onSend: _sendMessage,
-      messages: [],
+      messages: messages,
+      messageOptions: const MessageOptions(showTime: true),
+      inputOptions: const InputOptions(alwaysShowSend: true),
     );
   }
 
   Future<void> _sendMessage(ChatMessage chatMessage) async {
     Message message = Message(
       senderID: currentUser!.id,
+      senderName: widget.loggedInUserName,
       content: chatMessage.text,
       messageType: MessageType.Text,
       sentAt: Timestamp.fromDate(chatMessage.createdAt),
     );
+
+    await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(widget.chatId)
+        .collection('messages')
+        .add(message.toJson());
   }
 }

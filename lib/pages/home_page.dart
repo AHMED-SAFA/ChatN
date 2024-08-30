@@ -58,7 +58,9 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("ChatN"),
+        title: Text(
+          _loggedInUserData!['name'],
+        ),
         centerTitle: true,
         actions: [
           IconButton(

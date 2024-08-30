@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:chat/models/message.dart';
 import 'package:chat/services/auth_service.dart';
+import 'package:chat/services/media_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
@@ -13,13 +15,13 @@ class ChatPage extends StatefulWidget {
   final String loggedInUserName;
 
   const ChatPage({
-    Key? key,
+    super.key,
     required this.chatId,
     required this.currentUserId,
     required this.otherUserId,
     required this.otherUserName,
     required this.loggedInUserName,
-  }) : super(key: key);
+  });
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -28,6 +30,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   late AuthService _authService;
   final GetIt _getIt = GetIt.instance;
+  late MediaService _mediaService;
   ChatUser? currentUser, otherUser;
   List<ChatMessage> messages = [];
 
@@ -35,9 +38,11 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
     _authService = _getIt.get<AuthService>();
+    _mediaService = _getIt.get<MediaService>();
     currentUser = ChatUser(
       id: _authService.user!.uid,
-      firstName: _authService.user!.displayName,
+      // firstName: _authService.user!.displayName,
+      firstName: widget.loggedInUserName,
     );
     otherUser = ChatUser(
       id: widget.otherUserId,
@@ -85,23 +90,70 @@ class _ChatPageState extends State<ChatPage> {
       onSend: _sendMessage,
       messages: messages,
       messageOptions: const MessageOptions(showTime: true),
-      inputOptions: const InputOptions(alwaysShowSend: true),
+      inputOptions: InputOptions(
+        alwaysShowSend: true,
+        trailing: [
+          _mediaMessageButton(),
+        ],
+      ),
     );
   }
 
   Future<void> _sendMessage(ChatMessage chatMessage) async {
-    Message message = Message(
-      senderID: currentUser!.id,
-      senderName: widget.loggedInUserName,
-      content: chatMessage.text,
-      messageType: MessageType.Text,
-      sentAt: Timestamp.fromDate(chatMessage.createdAt),
-    );
+    if (chatMessage.medias?.isNotEmpty ?? false) {
+      if (chatMessage.medias?.first.type == MediaType.image) {
+        Message message = Message(
+          senderID: currentUser!.id,
+          senderName: widget.loggedInUserName,
+          content: chatMessage.medias!.first.url,
+          messageType: MessageType.Image,
+          sentAt: Timestamp.fromDate(chatMessage.createdAt),
+        );
+        await FirebaseFirestore.instance
+            .collection('chats')
+            .doc(widget.chatId)
+            .collection('messages')
+            .add(message.toJson());
+      }
+    } else {
+      Message message = Message(
+        senderID: currentUser!.id,
+        senderName: widget.loggedInUserName,
+        content: chatMessage.text,
+        messageType: MessageType.Text,
+        sentAt: Timestamp.fromDate(chatMessage.createdAt),
+      );
 
-    await FirebaseFirestore.instance
-        .collection('chats')
-        .doc(widget.chatId)
-        .collection('messages')
-        .add(message.toJson());
+      await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(widget.chatId)
+          .collection('messages')
+          .add(message.toJson());
+    }
+  }
+
+  Widget _mediaMessageButton() {
+    return IconButton(
+      onPressed: () async {
+        File? file = await _mediaService.getImageFromGallery();
+        if (file != null) {
+          String? imageUrl = await _mediaService.uploadImageToChat(
+              file: file, chatId: widget.chatId);
+
+          if (imageUrl != null) {
+            ChatMessage chatMessage = ChatMessage(
+              createdAt: DateTime.now(),
+              user: currentUser!,
+              medias: [
+                ChatMedia(url: imageUrl, fileName: "", type: MediaType.image),
+              ],
+            );
+            _sendMessage(chatMessage);
+          }
+        }
+      },
+      icon: Icon(Icons.attachment),
+      color: Colors.black,
+    );
   }
 }

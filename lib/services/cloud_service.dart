@@ -1,12 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:delightful_toast/delight_toast.dart';
-import 'package:delightful_toast/toast/components/toast_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 
 class CloudService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,6 +9,7 @@ class CloudService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
 
+  //cloud firestore
   Future<void> storeUserData({
     required String userId,
     required String name,
@@ -28,6 +24,7 @@ class CloudService {
     });
   }
 
+  //realtime db
   Future<void> storeUserDataInRealtimeDatabase({
     required String userId,
     required String name,
@@ -63,6 +60,7 @@ class CloudService {
     return users;
   }
 
+  //from cloud firestore
   Future<Map<String, dynamic>?> fetchUserData({required String userId}) async {
     try {
       DocumentSnapshot userDoc =
@@ -76,6 +74,7 @@ class CloudService {
     return null;
   }
 
+  //from everywhere
   Future<void> deleteUserAccount(String userId) async {
     try {
       // Fetch user data first to get profile image URL
@@ -102,10 +101,9 @@ class CloudService {
       // Delete Firebase Authentication account
       User? user = _firebaseAuth.currentUser;
       if (user != null && user.uid == userId) await user.delete();
-
-
     } catch (e) {
       print("Error deleting user account: $e");
     }
   }
+
 }

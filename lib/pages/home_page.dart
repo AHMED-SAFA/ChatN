@@ -59,7 +59,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _loggedInUserData!['name'],
+          _loggedInUserData?['name'] ?? 'Person',
         ),
         centerTitle: true,
         actions: [

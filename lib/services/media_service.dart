@@ -16,11 +16,24 @@ class MediaService {
     return null;
   }
 
-
+  //save to firestore
   Future<String> uploadImageToStorage(File image, String userId) async {
-    Reference ref = firebaseStorage.ref('users/profile_images').child('$userId${p.extension(image.path)}');
+    Reference ref = firebaseStorage
+        .ref('users/profile_images')
+        .child('$userId${p.extension(image.path)}');
     UploadTask uploadTask = ref.putFile(image);
     TaskSnapshot snapshot = await uploadTask;
+    return await snapshot.ref.getDownloadURL();
+  }
+
+  Future<String?> uploadImageToChat(
+      {required File file, required String chatId}) async {
+    Reference fileRef = firebaseStorage
+        .ref('chats/$chatId')
+        .child('${DateTime.now().toIso8601String()}${p.extension(file.path)}');
+
+    UploadTask task = fileRef.putFile(file);
+    TaskSnapshot snapshot = await task;
     return await snapshot.ref.getDownloadURL();
   }
 }

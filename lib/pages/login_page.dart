@@ -54,19 +54,13 @@ class _LoginState extends State<Login> {
   Widget _headerText() {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: const Column(
         children: [
           Text(
-            "Hello, Welcome",
-            style: TextStyle(
-              fontSize: 30,
-              color: Colors.black,
-              fontWeight: FontWeight.w400,
-            ),
+            "Welcome to ChatN",
+            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
           ),
+          Text("Enter your credential to login"),
         ],
       ),
     );
@@ -87,8 +81,9 @@ class _LoginState extends State<Login> {
           children: [
             _buildFormField(
               controller: _emailController,
-              labelText: 'Email',
               hintText: 'Enter your email',
+              labelText: 'Email',
+              prefixIcon: Icons.email_outlined,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your email';
@@ -101,8 +96,9 @@ class _LoginState extends State<Login> {
             ),
             _buildFormField(
               controller: _passwordController,
-              labelText: 'Password',
               hintText: 'Enter your password',
+              labelText: 'Password',
+              prefixIcon: Icons.password,
               obscureText: true,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -123,17 +119,25 @@ class _LoginState extends State<Login> {
 
   Widget _buildFormField({
     required TextEditingController controller,
-    required String labelText,
     required String hintText,
+    required String labelText,
     required FormFieldValidator<String>? validator,
+    required IconData? prefixIcon,
     bool obscureText = false,
   }) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
-        labelText: labelText,
         hintText: hintText,
-        border: OutlineInputBorder(),
+        labelText: labelText,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        fillColor: Color(0xFFebc6f7).withOpacity(0.1),
+        filled: true,
+        prefixIcon:
+            prefixIcon != null ? Icon(prefixIcon, color: Colors.black) : null,
       ),
       obscureText: obscureText,
       validator: validator,
@@ -181,8 +185,9 @@ class _LoginState extends State<Login> {
             }
           }
         },
+        shape: const StadiumBorder(),
         color: Theme.of(context).colorScheme.primary,
-        child: Text(
+        child: const Text(
           "Login",
           style: TextStyle(
             fontSize: 20,
@@ -199,7 +204,10 @@ class _LoginState extends State<Login> {
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("New Here? ", style: TextStyle(fontSize: 18)),
+          const Text(
+            "Don't have an account? ",
+            style: TextStyle(fontSize: 18),
+          ),
           GestureDetector(
             onTap: () {
               _navigationService.pushNamed("/register");
@@ -209,7 +217,7 @@ class _LoginState extends State<Login> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: Colors.blue,
+                color: Colors.purple,
               ),
             ),
           ),

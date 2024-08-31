@@ -42,14 +42,12 @@ class _RegisterPageState extends State<RegisterPage> {
     _cloudService = _getIt.get<CloudService>();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: Text(
-          "Register",
-        ),
-      ),
+      appBar: AppBar(),
+      
       body: _regUI(),
     );
   }
@@ -57,9 +55,10 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget _regUI() {
     return SafeArea(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
         child: Column(
           children: [
+            if (!isLoading) _regHeader(),
             if (!isLoading) _formField(),
             if (!isLoading) _loginButtonText(),
             if (isLoading)
@@ -70,6 +69,29 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _regHeader() {
+    return SizedBox(
+      width: MediaQuery.sizeOf(context).width,
+      child: const Column(
+        children: [
+          Text(
+            "Sign up",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            "Create your account",
+            style: TextStyle(
+              fontSize: 12,
+            ),
+          )
+        ],
       ),
     );
   }
@@ -87,12 +109,13 @@ class _RegisterPageState extends State<RegisterPage> {
           mainAxisSize: MainAxisSize.max,
           children: [
             _imagePicker(),
-            SizedBox(
+            const SizedBox(
               height: 30,
             ),
             _buildFormField(
               controller: _nameController,
               labelText: 'Name',
+              prefixIcon: Icons.person,
               hintText: 'Enter your name',
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -101,12 +124,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 return null;
               },
             ),
-            SizedBox(
+            const SizedBox(
               height: 15,
             ),
             _buildFormField(
               controller: _emailController,
               labelText: 'Email',
+              prefixIcon: Icons.email_outlined,
               hintText: 'Enter your email',
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -118,12 +142,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 return null;
               },
             ),
-            SizedBox(
+            const SizedBox(
               height: 15,
             ),
             _buildFormField(
               controller: _passwordController,
               labelText: 'Password',
+              prefixIcon: Icons.password,
               hintText: 'Enter your password',
               obscureText: true,
               validator: (value) {
@@ -150,6 +175,7 @@ class _RegisterPageState extends State<RegisterPage> {
     required TextEditingController controller,
     required String labelText,
     required String hintText,
+    required IconData? prefixIcon,
     required FormFieldValidator<String>? validator,
     bool obscureText = false,
   }) {
@@ -158,7 +184,14 @@ class _RegisterPageState extends State<RegisterPage> {
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
-        border: OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        fillColor: Color(0xFFbbc6f7).withOpacity(0.1),
+        filled: true,
+        prefixIcon:
+            prefixIcon != null ? Icon(prefixIcon, color: Colors.black) : null,
       ),
       obscureText: obscureText,
       validator: validator,
@@ -260,7 +293,8 @@ class _RegisterPageState extends State<RegisterPage> {
           }
         },
         color: Theme.of(context).colorScheme.primary,
-        child: Text(
+        shape: const StadiumBorder(),
+        child: const Text(
           "Register",
           style: TextStyle(
             fontSize: 20,
@@ -277,7 +311,8 @@ class _RegisterPageState extends State<RegisterPage> {
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text("Already familiar? ", style: TextStyle(fontSize: 18)),
+          const Text("Already have an account? ",
+              style: TextStyle(fontSize: 18)),
           GestureDetector(
             onTap: () {
               _navigationService.goBack();
@@ -285,10 +320,9 @@ class _RegisterPageState extends State<RegisterPage> {
             child: const Text(
               "Login",
               style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Colors.blue,
-              ),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.purple),
             ),
           ),
         ],
@@ -308,6 +342,7 @@ class _RegisterPageState extends State<RegisterPage> {
       },
       child: CircleAvatar(
         radius: 64,
+        backgroundColor: Colors.black,
         backgroundImage: selectedImage != null
             ? FileImage(selectedImage!)
             : NetworkImage(avatar) as ImageProvider,

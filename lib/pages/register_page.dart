@@ -17,6 +17,8 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
+
+
 class _RegisterPageState extends State<RegisterPage> {
   File? selectedImage;
   String avatar =
@@ -30,8 +32,11 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   late AuthService _authService;
   late MediaService _mediaService;
-  String? email, password, name;
+  String? email, password, name, department;
   bool isLoading = false;
+
+  // List of departments
+  final List<String> _departments_name_available = ['CSE', 'EEE', 'ME', 'CE', 'BME', 'Arch', 'ECE', 'URP'];
 
   @override
   void initState() {
@@ -47,7 +52,6 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(),
-      
       body: _regUI(),
     );
   }
@@ -161,7 +165,11 @@ class _RegisterPageState extends State<RegisterPage> {
                 return null;
               },
             ),
-            SizedBox(
+            const SizedBox(
+              height: 15,
+            ),
+            _buildDepartmentDropdown(),
+            const SizedBox(
               height: 15,
             ),
             _registerButton(),
@@ -188,13 +196,46 @@ class _RegisterPageState extends State<RegisterPage> {
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
         ),
-        fillColor: Color(0xFFbbc6f7).withOpacity(0.1),
+        fillColor: const Color(0xFFbbc6f7).withOpacity(0.1),
         filled: true,
         prefixIcon:
             prefixIcon != null ? Icon(prefixIcon, color: Colors.black) : null,
       ),
       obscureText: obscureText,
       validator: validator,
+    );
+  }
+
+  Widget _buildDepartmentDropdown() {
+    return DropdownButtonFormField<String>(
+      value: department,
+      items: _departments_name_available.map((String department) {
+        return DropdownMenuItem<String>(
+          value: department,
+          child: Text(department),
+        );
+      }).toList(),
+      onChanged: (value) {
+        setState(() {
+          department = value!;
+        });
+      },
+      decoration: InputDecoration(
+        labelText: 'Department',
+        hintText: 'Select your department',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        fillColor: Color(0xFFbbc6f7).withOpacity(0.1),
+        filled: true,
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please select your department';
+        }
+        return null;
+      },
     );
   }
 
@@ -231,6 +272,7 @@ class _RegisterPageState extends State<RegisterPage> {
               email = _emailController.text;
               password = _passwordController.text;
               name = _nameController.text;
+              String? selectedDepartment = department;
 
               // Firebase Authentication
               UserCredential userCredential =
@@ -246,15 +288,17 @@ class _RegisterPageState extends State<RegisterPage> {
               await _cloudService.storeUserData(
                 userId: userId,
                 name: name!,
-                profileImageUrl: imageUrl!,
+                department: selectedDepartment!,
+                profileImageUrl: imageUrl,
               );
 
               // Store user data in Realtime Database
               await _cloudService.storeUserDataInRealtimeDatabase(
-                userId: userId!,
+                userId: userId,
                 name: name!,
                 email: email!,
                 password: password!,
+                department: selectedDepartment,
               );
 
               showToast(
@@ -263,8 +307,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 animation: StyledToastAnimation.scale,
                 reverseAnimation: StyledToastAnimation.fade,
                 position: StyledToastPosition.bottom,
-                animDuration: Duration(seconds: 1),
-                duration: Duration(seconds: 4),
+                animDuration: const Duration(seconds: 1),
+                duration: const Duration(seconds: 4),
                 curve: Curves.elasticOut,
                 reverseCurve: Curves.linear,
               );

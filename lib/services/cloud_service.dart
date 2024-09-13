@@ -13,12 +13,14 @@ class CloudService {
   Future<void> storeUserData({
     required String userId,
     required String name,
+    required String department,
     required String profileImageUrl,
   }) async {
     DocumentReference userDoc = _firestore.collection('users').doc(userId);
 
     await userDoc.set({
       'name': name,
+      'department': department,
       'profileImageUrl': profileImageUrl,
       'userId': userId,
     });
@@ -30,13 +32,14 @@ class CloudService {
     required String name,
     required String email,
     required String password,
+    required String department,
   }) async {
     DatabaseReference userRef = _realtimeDb.ref().child('users/$userId');
-
     await userRef.set({
       'name': name,
       'email': email,
       'password': password,
+      'department': department,
     });
   }
 
@@ -105,5 +108,4 @@ class CloudService {
       print("Error deleting user account: $e");
     }
   }
-
 }

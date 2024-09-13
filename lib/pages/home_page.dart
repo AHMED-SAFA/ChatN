@@ -59,7 +59,9 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _loggedInUserData?['name'] ?? 'Person',
+          _loggedInUserData != null
+              ? '${_loggedInUserData!['name']}(${_loggedInUserData!['department']})'
+              : 'Person',
         ),
         centerTitle: true,
         actions: [

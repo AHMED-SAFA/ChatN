@@ -9,7 +9,7 @@ class CloudService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
 
-  //cloud firestore
+  //store to cloud firestore
   Future<void> storeUserData({
     required String userId,
     required String name,
@@ -43,31 +43,39 @@ class CloudService {
     });
   }
 
+  //fetch from cloud firestore
   Future<List<Map<String, dynamic>>> fetchRegisteredUsers({
+    required String department,
     required String loggedInUserId,
   }) async {
-    QuerySnapshot snapshot = await _firestore.collection('users').get();
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('users')
+        .where('department', isEqualTo: department)
+        .get();
+
     List<Map<String, dynamic>> users = [];
 
-    for (var doc in snapshot.docs) {
+    for (var doc in querySnapshot.docs) {
       Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
+
       if (userData['userId'] != loggedInUserId) {
         users.add({
           'name': userData['name'],
+          'department': userData['department'],
           'profileImageUrl': userData['profileImageUrl'],
           'userId': userData['userId'],
         });
       }
     }
-
     return users;
   }
 
   //from cloud firestore
-  Future<Map<String, dynamic>?> fetchUserData({required String userId}) async {
+  Future<Map<String, dynamic>?> fetchLoggedInUserData(
+      {required String userId}) async {
     try {
       DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(userId).get();
+      await _firestore.collection('users').doc(userId).get();
       if (userDoc.exists) {
         return userDoc.data() as Map<String, dynamic>?;
       }
@@ -82,10 +90,10 @@ class CloudService {
     try {
       // Fetch user data first to get profile image URL
       DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(userId).get();
+      await _firestore.collection('users').doc(userId).get();
       if (userDoc.exists) {
         Map<String, dynamic>? userData =
-            userDoc.data() as Map<String, dynamic>?;
+        userDoc.data() as Map<String, dynamic>?;
         if (userData != null && userData.containsKey('profileImageUrl')) {
           String profileImageUrl = userData['profileImageUrl'];
 
@@ -109,3 +117,4 @@ class CloudService {
     }
   }
 }
+

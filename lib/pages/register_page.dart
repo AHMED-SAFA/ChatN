@@ -17,8 +17,6 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
-
-
 class _RegisterPageState extends State<RegisterPage> {
   File? selectedImage;
   String avatar =
@@ -35,6 +33,17 @@ class _RegisterPageState extends State<RegisterPage> {
   String? email, password, name, department;
   bool isLoading = false;
 
+  // List of departments
+  final List<String> _departments_name_available = [
+    'CSE',
+    'EEE',
+    'ME',
+    'CE',
+    'BME',
+    'Arch',
+    'ECE',
+    'URP'
+  ];
 
   @override
   void initState() {
@@ -280,7 +289,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // Upload image to Firebase Storage
               String? imageUrl = await _mediaService.uploadImageToStorage(
-                  selectedImage!, userId!);
+                selectedImage!,
+                userId!,
+              );
 
               // Store user data in Firestore
               await _cloudService.storeUserData(

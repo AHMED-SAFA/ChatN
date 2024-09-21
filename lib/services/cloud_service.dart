@@ -107,7 +107,7 @@ class CloudService {
       await _firestore.collection('users').doc(userId).delete();
 
       // Delete user data from Realtime Database
-      await _realtimeDb.ref().child('users/$userId').remove();
+      // await _realtimeDb.ref().child('users/$userId').remove();
 
       // Delete Firebase Authentication account
       User? user = _firebaseAuth.currentUser;

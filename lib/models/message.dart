@@ -23,6 +23,7 @@ class Message {
     content = json['content'];
     sentAt = json['sentAt'];
     messageType = MessageType.values.byName(json['messageType']);
+
   }
 
   Map<String, dynamic> toJson() {
@@ -32,6 +33,8 @@ class Message {
     data['content'] = content;
     data['sentAt'] = sentAt;
     data['messageType'] = messageType!.name;
+
     return data;
   }
 }
+

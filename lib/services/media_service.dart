@@ -26,14 +26,20 @@ class MediaService {
     return await snapshot.ref.getDownloadURL();
   }
 
-  Future<String?> uploadImageToChat(
+  Future<String?> uploadImageToStorageFromChatUpload(
       {required File file, required String chatId}) async {
     Reference fileRef = firebaseStorage
         .ref('chats/$chatId')
         .child('${DateTime.now().toIso8601String()}${p.extension(file.path)}');
 
     UploadTask task = fileRef.putFile(file);
-    TaskSnapshot snapshot = await task;
-    return await snapshot.ref.getDownloadURL();
+    return task.then((p) {
+      if (p.state == TaskState.success) {
+        return fileRef.getDownloadURL();
+      }
+    });
   }
 }
+
+// TaskSnapshot snapshot = await task;
+// return await snapshot.ref.getDownloadURL();

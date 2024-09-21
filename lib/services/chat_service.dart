@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/message.dart';
 
 class ChatService {
-
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
 
   Future<String> createOrGetChat({
@@ -17,7 +17,8 @@ class ChatService {
       String chatId = userIds.join('_');
 
       // Check if chat already exists
-      DocumentReference chatDoc = _firebaseFirestore.collection('chats').doc(chatId);
+      DocumentReference chatDoc =
+          _firebaseFirestore.collection('chats').doc(chatId);
       DocumentSnapshot chatSnapshot = await chatDoc.get();
 
       if (!chatSnapshot.exists) {
@@ -35,11 +36,28 @@ class ChatService {
     }
   }
 
+  Future<void> addMessage({
+    required String chatId,
+    required Message message,
+  }) async {
+    try {
+      await _firebaseFirestore
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .add(message.toJson());
+    } catch (e) {
+      throw Exception("Could not send message: $e");
+    }
+  }
 
-
-
-
+  Stream<QuerySnapshot> getMessages(String chatId) {
+    return _firebaseFirestore
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .orderBy('sentAt', descending: true)
+        .snapshots();
+  }
 }
-
-
 

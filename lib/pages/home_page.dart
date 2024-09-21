@@ -1,3 +1,4 @@
+import 'package:chat/services/activeUser_service.dart';
 import 'package:chat/services/auth_service.dart';
 import 'package:chat/services/navigation_service.dart';
 import 'package:delightful_toast/delight_toast.dart';
@@ -16,26 +17,59 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
+// class _HomeState extends State<Home> {
+//   final GetIt _getIt = GetIt.instance;
+//   late AuthService _authService;
+//   late NavigationService _navigationService;
+//   late ActiveUserService _activeUserService;
+//   late CloudService _cloudService;
+//   late ChatService _chatService;
+//   late String _loggedInUserId;
+//   Map<String, dynamic>? _loggedInUserData;
+//   List<Map<String, dynamic>> _users = [];
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     _authService = _getIt.get<AuthService>();
+//     _navigationService = _getIt.get<NavigationService>();
+//     _activeUserService = _getIt.get<ActiveUserService>();
+//     _cloudService = _getIt.get<CloudService>();
+//     _chatService = _getIt.get<ChatService>();
+//     _loggedInUserId = _authService.user!.uid;
+//     _fetchLoggedInUserData();
+//   }
+
 class _HomeState extends State<Home> {
   final GetIt _getIt = GetIt.instance;
   late AuthService _authService;
   late NavigationService _navigationService;
   late CloudService _cloudService;
   late ChatService _chatService;
+  late ActiveUserService _activeUserService;
   late String _loggedInUserId;
   Map<String, dynamic>? _loggedInUserData;
   List<Map<String, dynamic>> _users = [];
+  Map<String, bool> _activeUsers = {};
 
   @override
   void initState() {
     super.initState();
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
-    // _notificationService = _getIt.get<NotificationService>();
     _cloudService = _getIt.get<CloudService>();
     _chatService = _getIt.get<ChatService>();
+    _activeUserService =
+        _getIt.get<ActiveUserService>();
     _loggedInUserId = _authService.user!.uid;
     _fetchLoggedInUserData();
+
+    // Listen to active status changes
+    _activeUserService.getActiveUsersStream().listen((activeUsers) {
+      setState(() {
+        _activeUsers = activeUsers;
+      });
+    });
   }
 
   Future<void> _fetchUsers() async {
@@ -175,6 +209,46 @@ class _HomeState extends State<Home> {
     );
   }
 
+  // Widget _availableList() {
+  //   return RefreshIndicator(
+  //     onRefresh: _refreshUsers,
+  //     child: _users.isEmpty
+  //         ? const Center(child: Text('No users found.'))
+  //         : ListView.builder(
+  //             itemCount: _users.length,
+  //             itemBuilder: (context, index) {
+  //               final user = _users[index];
+  //               return ListTile(
+  //                 leading: CircleAvatar(
+  //                   backgroundImage: NetworkImage(user['profileImageUrl']),
+  //                 ),
+  //                 title: Text(user['name']),
+  //                 onTap: () async {
+  //                   String chatId = await _chatService.createOrGetChat(
+  //                     userId1: _loggedInUserId,
+  //                     name1: _loggedInUserData!['name'],
+  //                     userId2: user['userId'],
+  //                     name2: user['name'],
+  //                   );
+  //
+  //                   _navigationService.push(
+  //                     MaterialPageRoute(
+  //                       builder: (context) => ChatPage(
+  //                         loggedInUserName: _loggedInUserData!['name'],
+  //                         otherUserName: user['name'],
+  //                         chatId: chatId,
+  //                         currentUserId: _loggedInUserId,
+  //                         otherUserId: user['userId'],
+  //                       ),
+  //                     ),
+  //                   );
+  //                 },
+  //               );
+  //             },
+  //           ),
+  //   );
+  // }
+
   Widget _availableList() {
     return RefreshIndicator(
       onRefresh: _refreshUsers,
@@ -184,9 +258,27 @@ class _HomeState extends State<Home> {
               itemCount: _users.length,
               itemBuilder: (context, index) {
                 final user = _users[index];
+                bool isActive = _activeUsers[user['userId']] ?? false;
+
                 return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(user['profileImageUrl']),
+                  leading: Stack(
+                    children: [
+                      CircleAvatar(
+                        backgroundImage: NetworkImage(user['profileImageUrl']),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: isActive ? Colors.green : Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   title: Text(user['name']),
                   onTap: () async {

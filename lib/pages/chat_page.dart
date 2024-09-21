@@ -3,6 +3,7 @@ import 'package:chat/models/message.dart';
 import 'package:chat/services/auth_service.dart';
 import 'package:chat/services/chat_service.dart';
 import 'package:chat/services/media_service.dart';
+import 'package:chat/services/notification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   late AuthService _authService;
   late ChatService _chatService;
+  late NotificationService _notificationService;
   late MediaService _mediaService;
   final GetIt _getIt = GetIt.instance;
   ChatUser? currentUser, otherUser;
@@ -42,6 +44,7 @@ class _ChatPageState extends State<ChatPage> {
     _authService = _getIt.get<AuthService>();
     _chatService = _getIt.get<ChatService>();
     _mediaService = _getIt.get<MediaService>();
+    _notificationService = _getIt.get<NotificationService>();
     currentUser = ChatUser(
       id: _authService.user!.uid,
       firstName: widget.loggedInUserName,
@@ -138,7 +141,7 @@ class _ChatPageState extends State<ChatPage> {
         message: message, // Now message is non-null
       );
 
-      await _chatService.storeNotificationForMessage(
+      await _notificationService.storeNotificationForMessage(
         chatId: widget.chatId,
         loggedInUserId: widget.currentUserId,
         loggedInUserName: widget.loggedInUserName,

@@ -15,11 +15,13 @@ class CloudService {
     required String name,
     required String department,
     required String profileImageUrl,
+    required bool activeStatus,
   }) async {
     DocumentReference userDoc = _firestore.collection('users').doc(userId);
 
     await userDoc.set({
       'name': name,
+      'ActiveStatus': '',
       'department': department,
       'profileImageUrl': profileImageUrl,
       'userId': userId,
@@ -75,7 +77,7 @@ class CloudService {
       {required String userId}) async {
     try {
       DocumentSnapshot userDoc =
-      await _firestore.collection('users').doc(userId).get();
+          await _firestore.collection('users').doc(userId).get();
       if (userDoc.exists) {
         return userDoc.data() as Map<String, dynamic>?;
       }
@@ -90,10 +92,10 @@ class CloudService {
     try {
       // Fetch user data first to get profile image URL
       DocumentSnapshot userDoc =
-      await _firestore.collection('users').doc(userId).get();
+          await _firestore.collection('users').doc(userId).get();
       if (userDoc.exists) {
         Map<String, dynamic>? userData =
-        userDoc.data() as Map<String, dynamic>?;
+            userDoc.data() as Map<String, dynamic>?;
         if (userData != null && userData.containsKey('profileImageUrl')) {
           String profileImageUrl = userData['profileImageUrl'];
 
@@ -117,4 +119,3 @@ class CloudService {
     }
   }
 }
-

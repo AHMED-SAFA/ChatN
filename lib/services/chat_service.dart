@@ -52,46 +52,6 @@ class ChatService {
     }
   }
 
-  // Future<void> storeNotificationForMessage({
-  //   required String chatId,
-  //   required String loggedInUserId,
-  //   required String loggedInUserName,
-  //   required String sendingId,
-  // }) async {
-  //   DocumentReference userDoc =
-  //       _firebaseFirestore.collection('users').doc(sendingId).collection('notifications') as DocumentReference<Object?>;
-  //
-  //   await userDoc.set({
-  //     'chat ID': chatId,
-  //     'Sender Name': loggedInUserName,
-  //     'Sender ID': loggedInUserId,
-  //   });
-  // }
-
-  Future<void> storeNotificationForMessage({
-    required String chatId,
-    required String loggedInUserId,
-    required String loggedInUserName,
-    required String receiverId,
-  }) async {
-    try {
-      DocumentReference notificationDoc = _firebaseFirestore
-          .collection('users')
-          .doc(receiverId)
-          .collection('notifications')
-          .doc();
-
-      // Store the notification details
-      await notificationDoc.set({
-        'chatId': chatId,
-        'senderName': loggedInUserName,
-        'senderId': loggedInUserId,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      throw Exception("Could not store notification: $e");
-    }
-  }
 
   Stream<QuerySnapshot> getMessages(String chatId) {
     return _firebaseFirestore

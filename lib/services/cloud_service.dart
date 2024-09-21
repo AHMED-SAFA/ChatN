@@ -118,4 +118,5 @@ class CloudService {
       print("Error deleting user account: $e");
     }
   }
+
 }

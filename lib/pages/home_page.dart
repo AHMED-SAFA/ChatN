@@ -55,12 +55,12 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
     _cloudService = _getIt.get<CloudService>();
     _chatService = _getIt.get<ChatService>();
-    _activeUserService =
-        _getIt.get<ActiveUserService>();
+    _activeUserService = _getIt.get<ActiveUserService>();
     _loggedInUserId = _authService.user!.uid;
     _fetchLoggedInUserData();
 
@@ -70,6 +70,7 @@ class _HomeState extends State<Home> {
         _activeUsers = activeUsers;
       });
     });
+
   }
 
   Future<void> _fetchUsers() async {

@@ -29,10 +29,11 @@ class AuthService {
   }
 
   void authListener(User? user) {
-    if (user != null)
+    if (user != null) {
       _user = user;
-    else
+    } else {
       _user = null;
+    }
   }
 
   Future<bool> logout() async {

@@ -35,8 +35,6 @@ class _RegisterPageState extends State<RegisterPage> {
   String? email, password, name, department;
   bool isLoading = false;
 
-  // List of departments
-  final List<String> _departments_name_available = ['CSE', 'EEE', 'ME', 'CE', 'BME', 'Arch', 'ECE', 'URP'];
 
   @override
   void initState() {

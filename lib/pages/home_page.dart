@@ -31,6 +31,7 @@ class _HomeState extends State<Home> {
     super.initState();
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
+    // _notificationService = _getIt.get<NotificationService>();
     _cloudService = _getIt.get<CloudService>();
     _chatService = _getIt.get<ChatService>();
     _loggedInUserId = _authService.user!.uid;
@@ -56,7 +57,7 @@ class _HomeState extends State<Home> {
 
   Future<void> _fetchLoggedInUserData() async {
     _loggedInUserData =
-    await _cloudService.fetchLoggedInUserData(userId: _loggedInUserId);
+        await _cloudService.fetchLoggedInUserData(userId: _loggedInUserId);
     await _fetchUsers();
     setState(() {});
   }
@@ -80,6 +81,18 @@ class _HomeState extends State<Home> {
       ),
       drawer: _buildDrawer(),
       body: _homeUI(),
+    );
+  }
+
+  Widget _homeUI() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 20,
+          horizontal: 20,
+        ),
+        child: _availableList(),
+      ),
     );
   }
 
@@ -162,55 +175,43 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _homeUI() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 20,
-          horizontal: 20,
-        ),
-        child: _availableList(),
-      ),
-    );
-  }
-
   Widget _availableList() {
     return RefreshIndicator(
       onRefresh: _refreshUsers,
       child: _users.isEmpty
           ? const Center(child: Text('No users found.'))
           : ListView.builder(
-        itemCount: _users.length,
-        itemBuilder: (context, index) {
-          final user = _users[index];
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(user['profileImageUrl']),
-            ),
-            title: Text(user['name']),
-            onTap: () async {
-              String chatId = await _chatService.createOrGetChat(
-                userId1: _loggedInUserId,
-                name1: _loggedInUserData!['name'],
-                userId2: user['userId'],
-                name2: user['name'],
-              );
-
-              _navigationService.push(
-                MaterialPageRoute(
-                  builder: (context) => ChatPage(
-                    loggedInUserName: _loggedInUserData!['name'],
-                    otherUserName: user['name'],
-                    chatId: chatId,
-                    currentUserId: _loggedInUserId,
-                    otherUserId: user['userId'],
+              itemCount: _users.length,
+              itemBuilder: (context, index) {
+                final user = _users[index];
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(user['profileImageUrl']),
                   ),
-                ),
-              );
-            },
-          );
-        },
-      ),
+                  title: Text(user['name']),
+                  onTap: () async {
+                    String chatId = await _chatService.createOrGetChat(
+                      userId1: _loggedInUserId,
+                      name1: _loggedInUserData!['name'],
+                      userId2: user['userId'],
+                      name2: user['name'],
+                    );
+
+                    _navigationService.push(
+                      MaterialPageRoute(
+                        builder: (context) => ChatPage(
+                          loggedInUserName: _loggedInUserData!['name'],
+                          otherUserName: user['name'],
+                          chatId: chatId,
+                          currentUserId: _loggedInUserId,
+                          otherUserId: user['userId'],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
     );
   }
 }

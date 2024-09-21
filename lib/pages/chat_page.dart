@@ -82,23 +82,6 @@ class _ChatPageState extends State<ChatPage> {
             createdAt: message.sentAt!.toDate(),
           );
         }
-
-        // return ChatMessage(
-        //   user: message.senderID == widget.currentUserId
-        //       ? currentUser!
-        //       : otherUser!,
-        //   text: message.messageType == MessageType.Text ? message.content! : "",
-        //   medias: message.messageType == MessageType.Image
-        //       ? [
-        //           ChatMedia(
-        //             url: message.content!,
-        //             fileName: "",
-        //             type: MediaType.image,
-        //           ),
-        //         ]
-        //       : [],
-        //   createdAt: message.sentAt!.toDate(),
-        // );
       }).toList();
 
       setState(() {
@@ -107,12 +90,29 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  Future<void> _sendMessage(ChatMessage chatMessage) async {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.otherUserName),
+      ),
+      body: DashChat(
+        currentUser: currentUser!,
+        messages: messages,
+        onSend: _sendMessage,
+        inputOptions: InputOptions(
+          trailing: [
+            _mediaMessageButton(),
+          ],
+        ),
+      ),
+    );
+  }
 
+  Future<void> _sendMessage(ChatMessage chatMessage) async {
     Message? message;
 
-    if (chatMessage.medias?.isNotEmpty ?? false)
-    {
+    if (chatMessage.medias?.isNotEmpty ?? false) {
       if (chatMessage.medias!.first.type == MediaType.image) {
         message = Message(
           senderID: currentUser!.id,
@@ -122,8 +122,7 @@ class _ChatPageState extends State<ChatPage> {
           sentAt: Timestamp.fromDate(chatMessage.createdAt),
         );
       }
-    }
-    else {
+    } else {
       // Handle the text message case
       message = Message(
         senderID: currentUser!.id,
@@ -138,11 +137,17 @@ class _ChatPageState extends State<ChatPage> {
         chatId: widget.chatId,
         message: message, // Now message is non-null
       );
-    }
-    else {
+
+      await _chatService.storeNotificationForMessage(
+        chatId: widget.chatId,
+        loggedInUserId: widget.currentUserId,
+        loggedInUserName: widget.loggedInUserName,
+        receiverId: widget.otherUserId,
+      );
+
+    } else {
       throw Exception("Failed to create message. Please try again.");
     }
-
   }
 
   Widget _mediaMessageButton() {
@@ -176,24 +181,4 @@ class _ChatPageState extends State<ChatPage> {
       color: Colors.black,
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.otherUserName),
-      ),
-      body: DashChat(
-        currentUser: currentUser!,
-        messages: messages,
-        onSend: _sendMessage,
-        inputOptions: InputOptions(
-          trailing: [
-            _mediaMessageButton(),
-          ],
-        ),
-      ),
-    );
-  }
 }
-

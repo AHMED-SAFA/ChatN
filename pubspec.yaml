@@ -31,6 +31,9 @@ dependencies:
   flutter_styled_toast: ^2.2.1
   path: ^1.9.0
   image_picker: ^1.1.2
+  badges: ^3.1.2
+  push: ^2.3.0
+  firebase_messaging: ^15.1.2
 
 
 dev_dependencies:

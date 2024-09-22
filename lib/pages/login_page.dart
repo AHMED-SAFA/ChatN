@@ -22,6 +22,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _passwordController = TextEditingController();
   late AuthService _authService;
   String? email, password;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -35,19 +36,25 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: _buildLoginUI(),
+      body: _loginUI(),
     );
   }
 
-  Widget _buildLoginUI() {
+  Widget _loginUI() {
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
         child: Column(
           children: [
-            _headerText(),
-            _formField(),
-            _regButtonText(),
+            if (!isLoading) _headerText(),
+            if (!isLoading) _formField(),
+            if (!isLoading) _regButtonText(),
+            if (isLoading)
+              const Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
           ],
         ),
       ),
@@ -153,6 +160,9 @@ class _LoginState extends State<Login> {
       child: MaterialButton(
         onPressed: () async {
           if (_loginFormKey.currentState?.validate() ?? false) {
+            setState(() {
+              isLoading = true;
+            });
             email = _emailController.text;
             password = _passwordController.text;
             bool success = await _authService.login(email!, password!);

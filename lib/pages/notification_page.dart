@@ -1,4 +1,6 @@
 import 'package:chat/services/notification_service.dart';
+import 'package:delightful_toast/delight_toast.dart';
+import 'package:delightful_toast/toast/components/toast_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../services/auth_service.dart';
@@ -68,7 +70,6 @@ class _NotificationPageState extends State<NotificationPage> {
   }
 
   Widget _viewNotifications() {
-
     if (_notifications.isEmpty) {
       return const Center(child: Text("No notifications available."));
     }
@@ -82,13 +83,19 @@ class _NotificationPageState extends State<NotificationPage> {
           elevation: 4.0,
           margin: const EdgeInsets.symmetric(vertical: 8),
           child: ListTile(
-            title: Text(notification['senderName'],
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(
+              notification['senderName'],
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             subtitle: Text(
               "Received at: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(notification['timestamp'])}",
             ),
-            trailing: const Icon(Icons.message),
-            onTap: () {},
+            trailing: IconButton(
+              onPressed: () async {
+
+              },
+              icon: const Icon(Icons.delete),
+            ),
           ),
         );
       },

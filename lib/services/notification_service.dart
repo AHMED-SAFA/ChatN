@@ -16,7 +16,6 @@ class NotificationService {
           .collection('notifications')
           .doc();
 
-      // Store the notification details
       await notificationDoc.set({
         'chatId': chatId,
         'senderName': loggedInUserName,
@@ -32,7 +31,6 @@ class NotificationService {
     required String receiverId,
   }) async {
     try {
-      // Fetch all notifications for the receiver from Firestore
       QuerySnapshot notificationsSnapshot = await _firebaseFirestore
           .collection('users')
           .doc(receiverId)
@@ -54,4 +52,5 @@ class NotificationService {
       throw Exception("Could not retrieve notifications: $e");
     }
   }
+
 }

@@ -295,7 +295,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // Store user data in Firestore
               await _cloudService.storeUserData(
-                activeStatus: false,
+                activeStatus: true,
                 userId: userId,
                 name: name!,
                 department: selectedDepartment!,

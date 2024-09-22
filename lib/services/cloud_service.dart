@@ -21,7 +21,7 @@ class CloudService {
 
     await userDoc.set({
       'name': name,
-      'ActiveStatus': '',
+      'ActiveStatus': activeStatus,
       'department': department,
       'profileImageUrl': profileImageUrl,
       'userId': userId,
@@ -87,13 +87,15 @@ class CloudService {
     return null;
   }
 
-  //from everywhere
+  //del from everywhere
   Future<void> deleteUserAccount(String userId) async {
     try {
-      // Fetch user data first to get profile image URL
       DocumentSnapshot userDoc =
           await _firestore.collection('users').doc(userId).get();
+
       if (userDoc.exists) {
+
+        //delete dp from storage
         Map<String, dynamic>? userData =
             userDoc.data() as Map<String, dynamic>?;
         if (userData != null && userData.containsKey('profileImageUrl')) {
@@ -103,13 +105,14 @@ class CloudService {
           Reference storageRef = _firebaseStorage.refFromURL(profileImageUrl);
           await storageRef.delete();
         }
+
+        // Delete user data from Firestore
+        await _firestore.collection('users').doc(userId).delete();
+
       }
 
-      // Delete user data from Firestore
-      await _firestore.collection('users').doc(userId).delete();
-
       // Delete user data from Realtime Database
-      // await _realtimeDb.ref().child('users/$userId').remove();
+      await _realtimeDb.ref().child('users/$userId').remove();
 
       // Delete Firebase Authentication account
       User? user = _firebaseAuth.currentUser;

@@ -47,7 +47,6 @@ class _HomeState extends State<Home> {
         _activeUsers = activeUsers;
       });
     });
-
   }
 
   Future<void> _fetchUsers() async {
@@ -152,6 +151,8 @@ class _HomeState extends State<Home> {
             leading: const Icon(Icons.logout),
             title: const Text('Logout'),
             onTap: () async {
+              // Set active status to false before logging out
+              await _activeUserService.setInactive(_loggedInUserId);
               bool result = await _authService.logout();
               if (result) {
                 _navigationService.pushReplacementNamed("/login");
@@ -189,6 +190,73 @@ class _HomeState extends State<Home> {
     );
   }
 
+  // Widget _availableList() {
+  //   return RefreshIndicator(
+  //     onRefresh: _refreshUsers,
+  //     child: _users.isEmpty
+  //         ? const Center(child: Text('No users found.'))
+  //         : ListView.builder(
+  //             itemCount: _users.length,
+  //             itemBuilder: (context, index) {
+  //
+  //
+  //               final user = _users[index];
+  //               bool isActive = _activeUsers[user['userId']] ?? false;
+  //
+  //               bool getActiveStat = await _activeUserService.getActiveUsersStatus(
+  //                 userID: _loggedInUserId,
+  //               );
+  //
+  //
+  //               return ListTile(
+  //                 leading: Stack(
+  //                   children: [
+  //                     CircleAvatar(
+  //                       backgroundImage: NetworkImage(
+  //                         user['profileImageUrl'],
+  //                       ),
+  //                     ),
+  //                     Positioned(
+  //                       bottom: 0,
+  //                       right: 0,
+  //                       child: Container(
+  //                         width: 12,
+  //                         height: 12,
+  //                         decoration: BoxDecoration(
+  //                           color: getActiveStat ? Colors.green : Colors.red,
+  //                           shape: BoxShape.circle,
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //                 title: Text(user['name']),
+  //                 onTap: () async {
+  //                   String chatId = await _chatService.createOrGetChat(
+  //                     userId1: _loggedInUserId,
+  //                     name1: _loggedInUserData!['name'],
+  //                     userId2: user['userId'],
+  //                     name2: user['name'],
+  //                   );
+  //
+  //                   _navigationService.push(
+  //                     MaterialPageRoute(
+  //                       builder: (context) => ChatPage(
+  //                         loggedInUserName: _loggedInUserData!['name'],
+  //                         otherUserName: user['name'],
+  //                         chatId: chatId,
+  //                         currentUserId: _loggedInUserId,
+  //                         otherUserId: user['userId'],
+  //                       ),
+  //                     ),
+  //                   );
+  //                 },
+  //               );
+  //             },
+  //           ),
+  //   );
+  // }
+
   Widget _availableList() {
     return RefreshIndicator(
       onRefresh: _refreshUsers,
@@ -198,47 +266,58 @@ class _HomeState extends State<Home> {
               itemCount: _users.length,
               itemBuilder: (context, index) {
                 final user = _users[index];
-                bool isActive = _activeUsers[user['userId']] ?? false;
 
-                return ListTile(
-                  leading: Stack(
-                    children: [
-                      CircleAvatar(
-                        backgroundImage: NetworkImage(user['profileImageUrl']),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: isActive ? Colors.green : Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                    ],
+                // You can't await directly here, so we use FutureBuilder
+                return FutureBuilder<bool>(
+                  future: _activeUserService.getActiveUsersStatus(
+                    userID: user['userId'],
                   ),
-                  title: Text(user['name']),
-                  onTap: () async {
-                    String chatId = await _chatService.createOrGetChat(
-                      userId1: _loggedInUserId,
-                      name1: _loggedInUserData!['name'],
-                      userId2: user['userId'],
-                      name2: user['name'],
-                    );
+                  builder: (context, snapshot) {
+                    bool isActive = snapshot.data ?? false;
 
-                    _navigationService.push(
-                      MaterialPageRoute(
-                        builder: (context) => ChatPage(
-                          loggedInUserName: _loggedInUserData!['name'],
-                          otherUserName: user['name'],
-                          chatId: chatId,
-                          currentUserId: _loggedInUserId,
-                          otherUserId: user['userId'],
-                        ),
+                    return ListTile(
+                      leading: Stack(
+                        children: [
+                          CircleAvatar(
+                            backgroundImage: NetworkImage(
+                              user['profileImageUrl'],
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                color: isActive ? Colors.green : Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                      title: Text(user['name']),
+                      onTap: () async {
+                        String chatId = await _chatService.createOrGetChat(
+                          userId1: _loggedInUserId,
+                          name1: _loggedInUserData!['name'],
+                          userId2: user['userId'],
+                          name2: user['name'],
+                        );
+
+                        _navigationService.push(
+                          MaterialPageRoute(
+                            builder: (context) => ChatPage(
+                              loggedInUserName: _loggedInUserData!['name'],
+                              otherUserName: user['name'],
+                              chatId: chatId,
+                              currentUserId: _loggedInUserId,
+                              otherUserId: user['userId'],
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 );

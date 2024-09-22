@@ -1,3 +1,4 @@
+import 'package:chat/services/activeUser_service.dart';
 import 'package:chat/services/auth_service.dart';
 import 'package:chat/services/navigation_service.dart';
 import 'package:delightful_toast/delight_toast.dart';
@@ -15,6 +16,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final GetIt _getIt = GetIt.instance;
   late NavigationService _navigationService;
+  late ActiveUserService _activeUserService;
   final GlobalKey<FormState> _loginFormKey = GlobalKey();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -25,6 +27,7 @@ class _LoginState extends State<Login> {
   void initState() {
     super.initState();
     _authService = GetIt.I<AuthService>();
+    _activeUserService = GetIt.I<ActiveUserService>();
     _navigationService = _getIt.get<NavigationService>();
   }
 
@@ -165,6 +168,7 @@ class _LoginState extends State<Login> {
                 curve: Curves.elasticOut,
                 reverseCurve: Curves.linear,
               );
+              _activeUserService.setActive(_authService.user!.uid);
               _navigationService.pushReplacementNamed("/home");
             } else {
               DelightToastBar(

@@ -58,39 +58,6 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 
-  // Widget _viewNotifications() {
-  //   if (_notifications.isEmpty) {
-  //     return const Center(child: Text("No notifications available."));
-  //   }
-  //
-  //   return ListView.builder(
-  //     padding: const EdgeInsets.all(10),
-  //     itemCount: _notifications.length,
-  //     itemBuilder: (context, index) {
-  //       final notification = _notifications[index];
-  //       return Card(
-  //         elevation: 4.0,
-  //         margin: const EdgeInsets.symmetric(vertical: 8),
-  //         child: ListTile(
-  //           title: Text(
-  //             notification['senderName'],
-  //             style: const TextStyle(fontWeight: FontWeight.bold),
-  //           ),
-  //           subtitle: Text(
-  //             "Received at: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(notification['timestamp'])}",
-  //           ),
-  //           trailing: IconButton(
-  //             onPressed: () async {
-  //
-  //             },
-  //             icon: const Icon(Icons.delete),
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   Widget _viewNotifications() {
     if (_notifications.isEmpty) {
       return const Center(child: Text("No notifications available."));
@@ -100,7 +67,6 @@ class _NotificationPageState extends State<NotificationPage> {
       padding: const EdgeInsets.all(10),
       itemCount: _notifications.length,
       itemBuilder: (context, index) {
-
         final notification = _notifications[index];
         String notificationId = notification['id'];
 

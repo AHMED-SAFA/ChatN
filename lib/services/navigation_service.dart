@@ -3,6 +3,7 @@ import 'package:chat/pages/login_page.dart';
 import 'package:chat/pages/profile_page.dart';
 import 'package:chat/pages/register_page.dart';
 import 'package:flutter/material.dart';
+import '../pages/notification_page.dart';
 
 class NavigationService {
   late GlobalKey<NavigatorState> _navigatorKey;
@@ -11,6 +12,7 @@ class NavigationService {
     "/home": (context) => const Home(),
     "/register": (context) => const RegisterPage(),
     "/profile": (context) => const ProfilePage(),
+    "/notification": (context) => const NotificationPage(),
   };
 
   GlobalKey<NavigatorState>? get navigatorKey {

@@ -130,15 +130,15 @@ class _ChatPageState extends State<ChatPage> {
       message = Message(
         senderID: currentUser!.id,
         senderName: widget.loggedInUserName,
-        content: chatMessage.text, // Store text content
-        messageType: MessageType.Text, // Specify that this is a text message
+        content: chatMessage.text,
+        messageType: MessageType.Text,
         sentAt: Timestamp.fromDate(chatMessage.createdAt),
       );
     }
     if (message != null) {
       await _chatService.addMessage(
         chatId: widget.chatId,
-        message: message, // Now message is non-null
+        message: message,
       );
 
       await _notificationService.storeNotificationForMessage(

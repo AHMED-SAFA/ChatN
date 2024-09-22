@@ -17,29 +17,6 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-// class _HomeState extends State<Home> {
-//   final GetIt _getIt = GetIt.instance;
-//   late AuthService _authService;
-//   late NavigationService _navigationService;
-//   late ActiveUserService _activeUserService;
-//   late CloudService _cloudService;
-//   late ChatService _chatService;
-//   late String _loggedInUserId;
-//   Map<String, dynamic>? _loggedInUserData;
-//   List<Map<String, dynamic>> _users = [];
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _authService = _getIt.get<AuthService>();
-//     _navigationService = _getIt.get<NavigationService>();
-//     _activeUserService = _getIt.get<ActiveUserService>();
-//     _cloudService = _getIt.get<CloudService>();
-//     _chatService = _getIt.get<ChatService>();
-//     _loggedInUserId = _authService.user!.uid;
-//     _fetchLoggedInUserData();
-//   }
-
 class _HomeState extends State<Home> {
   final GetIt _getIt = GetIt.instance;
   late AuthService _authService;
@@ -110,7 +87,9 @@ class _HomeState extends State<Home> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications),
-            onPressed: () {},
+            onPressed: () {
+              _navigationService.pushNamed('/notification');
+            },
           ),
         ],
       ),
@@ -209,46 +188,6 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-
-  // Widget _availableList() {
-  //   return RefreshIndicator(
-  //     onRefresh: _refreshUsers,
-  //     child: _users.isEmpty
-  //         ? const Center(child: Text('No users found.'))
-  //         : ListView.builder(
-  //             itemCount: _users.length,
-  //             itemBuilder: (context, index) {
-  //               final user = _users[index];
-  //               return ListTile(
-  //                 leading: CircleAvatar(
-  //                   backgroundImage: NetworkImage(user['profileImageUrl']),
-  //                 ),
-  //                 title: Text(user['name']),
-  //                 onTap: () async {
-  //                   String chatId = await _chatService.createOrGetChat(
-  //                     userId1: _loggedInUserId,
-  //                     name1: _loggedInUserData!['name'],
-  //                     userId2: user['userId'],
-  //                     name2: user['name'],
-  //                   );
-  //
-  //                   _navigationService.push(
-  //                     MaterialPageRoute(
-  //                       builder: (context) => ChatPage(
-  //                         loggedInUserName: _loggedInUserData!['name'],
-  //                         otherUserName: user['name'],
-  //                         chatId: chatId,
-  //                         currentUserId: _loggedInUserId,
-  //                         otherUserId: user['userId'],
-  //                       ),
-  //                     ),
-  //                   );
-  //                 },
-  //               );
-  //             },
-  //           ),
-  //   );
-  // }
 
   Widget _availableList() {
     return RefreshIndicator(

@@ -54,24 +54,22 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadUserData() async {
     User? currentUser = _authService.user!;
 
-    if (currentUser != null) {
-      Map<String, dynamic>? userData =
-          await _cloudService.fetchLoggedInUserData(userId: currentUser.uid);
-      if (userData != null) {
-        setState(() {
-          _nameController.text = userData['name'];
-          _emailController.text = currentUser.email ?? '';
-          _departmentController.text = userData['department'];
-          _profileImageUrl = userData['profileImageUrl'];
-        });
-      }
+    Map<String, dynamic>? userData =
+        await _cloudService.fetchLoggedInUserData(userId: currentUser.uid);
+    if (userData != null) {
+      setState(() {
+        _nameController.text = userData['name'];
+        _emailController.text = currentUser.email ?? '';
+        _departmentController.text = userData['department'];
+        _profileImageUrl = userData['profileImageUrl'];
+      });
     }
-  }
+    }
 
   Future<void> _updateUserData() async {
     User? currentUser = _authService.user!;
 
-    if (currentUser != null && _passwordController.text.isNotEmpty) {
+    if (_passwordController.text.isNotEmpty) {
       try {
         // Reauthenticate user
         AuthCredential credential = EmailAuthProvider.credential(
@@ -100,7 +98,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
         // Update email if modified
         if (_emailController.text != currentUser.email) {
-          await currentUser.updateEmail(_emailController.text);
+          await currentUser.verifyBeforeUpdateEmail(_emailController.text);
         }
 
         // Update real-time database

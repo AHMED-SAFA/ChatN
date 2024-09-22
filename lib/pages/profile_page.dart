@@ -24,9 +24,8 @@ class _ProfilePageState extends State<ProfilePage> {
   late CloudService _cloudService;
   late MediaService _mediaService;
 
-
   // Storing original values before editing
-  late  String _originalName = '';
+  late String _originalName = '';
   late String _originalEmail = '';
   late String _originalPassword = '';
   late String _originalDepartment = '';
@@ -64,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _profileImageUrl = userData['profileImageUrl'];
       });
     }
-    }
+  }
 
   Future<void> _updateUserData() async {
     User? currentUser = _authService.user!;
@@ -131,7 +130,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ).show(context);
-
       } catch (e) {
         DelightToastBar(
           builder: (context) => const ToastCard(
@@ -168,66 +166,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: const Text('Profile'),
-  //       centerTitle: true,
-  //       actions: [
-  //         IconButton(
-  //           icon: Icon(_isEditing ? Icons.close : Icons.edit),
-  //           onPressed: () {
-  //             if (_isEditing) {
-  //               _updateUserData();
-  //             } else {
-  //               setState(() {
-  //                 _isEditing = true;
-  //               });
-  //             }
-  //           },
-  //         ),
-  //       ],
-  //     ),
-  //     body: _profileUI(),
-  //   );
-  // }
-  //
-  // Widget _profileUI() {
-  //   return SafeArea(
-  //     child: SingleChildScrollView(
-  //       child: Padding(
-  //         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 25),
-  //         child: Column(
-  //           children: [
-  //             _profileImage(),
-  //             _editableTextField('Name', _nameController),
-  //             _editableTextField('Email', _emailController),
-  //             _editableTextField('Password', _passwordController,
-  //                 isPassword: true),
-  //             _nonEditableTextField(
-  //               'Department',
-  //               _departmentController,
-  //             ),
-  //             if (_isEditing == true)
-  //               Padding(
-  //                 padding: const EdgeInsets.all(8.0),
-  //                 child: ElevatedButton(
-  //                   onPressed: _updateUserData,
-  //                   child: const Text('Save Changes'),
-  //                 ),
-  //               ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  //style
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -257,7 +195,6 @@ class _ProfilePageState extends State<ProfilePage> {
       body: _profileUI(),
     );
   }
-
 
   Widget _animatedButton({
     required VoidCallback onPressed,
@@ -296,7 +233,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-
   Widget _profileUI() {
     return SafeArea(
       child: SingleChildScrollView(
@@ -304,13 +240,12 @@ class _ProfilePageState extends State<ProfilePage> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 25),
           child: Column(
             children: [
-
               _profileImage(),
               _editableTextField('Name', _nameController),
               _editableTextField('Email', _emailController),
-              _editableTextField('Password', _passwordController, isPassword: true),
+              _editableTextField('Password', _passwordController,
+                  isPassword: true),
               _nonEditableTextField('Department', _departmentController),
-
               if (_isEditing == true)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -337,7 +272,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Cancel edit function to restore original values
+  // restore original values
   void _cancelEdit() {
     setState(() {
       // Restore original values
@@ -345,16 +280,11 @@ class _ProfilePageState extends State<ProfilePage> {
       _emailController.text = _originalEmail;
       _passwordController.text = _originalPassword;
       _departmentController.text = _originalDepartment;
-      _isEditing = false;  // Exit edit mode
+      _isEditing = false; // Exit edit mode
     });
   }
 
-
-
-
-
-
-
+  //style
   Widget _editableTextField(String label, TextEditingController controller,
       {bool isPassword = false}) {
     return Padding(
@@ -386,6 +316,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  //style
   Widget _profileImage() {
     return Padding(
       padding: const EdgeInsets.all(8.0),

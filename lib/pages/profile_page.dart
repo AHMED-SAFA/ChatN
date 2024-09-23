@@ -39,6 +39,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _profileImageUrl;
   bool _isEditing = false;
   bool _isClicked = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -61,6 +62,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _emailController.text = currentUser.email ?? '';
         _departmentController.text = userData['department'];
         _profileImageUrl = userData['profileImageUrl'];
+        _isLoading = false;
       });
     }
   }
@@ -192,7 +194,21 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-      body: _profileUI(),
+      body: _isLoading
+          ? const Padding(
+              padding: EdgeInsets.all(20),
+              child: Center(
+                child: LinearProgressIndicator(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(6),
+                  ),
+                  backgroundColor: Colors.black,
+                  minHeight: 10,
+                  color: Colors.deepPurpleAccent,
+                ),
+              ),
+            )
+          : _profileUI(),
     );
   }
 

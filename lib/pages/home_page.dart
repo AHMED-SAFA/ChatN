@@ -28,6 +28,7 @@ class _HomeState extends State<Home> {
   Map<String, dynamic>? _loggedInUserData;
   List<Map<String, dynamic>> _users = [];
   Map<String, bool> _activeUsers = {};
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -58,7 +59,9 @@ class _HomeState extends State<Home> {
         loggedInUserId: _loggedInUserId,
       );
 
-      setState(() {});
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -93,7 +96,11 @@ class _HomeState extends State<Home> {
         ],
       ),
       drawer: _buildDrawer(),
-      body: _homeUI(),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : _homeUI(),
     );
   }
 
@@ -151,9 +158,9 @@ class _HomeState extends State<Home> {
             leading: const Icon(Icons.logout),
             title: const Text('Logout'),
             onTap: () async {
-              // Set active status to false before logging out
               await _activeUserService.setInactive(_loggedInUserId);
               bool result = await _authService.logout();
+
               if (result) {
                 _navigationService.pushReplacementNamed("/login");
               }
@@ -166,6 +173,7 @@ class _HomeState extends State<Home> {
               User? user = FirebaseAuth.instance.currentUser;
               if (user != null) {
                 await _cloudService.deleteUserAccount(user.uid);
+                ;
                 _navigationService.pushReplacementNamed("/login");
                 DelightToastBar(
                   builder: (context) => const ToastCard(
@@ -189,73 +197,6 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-
-  // Widget _availableList() {
-  //   return RefreshIndicator(
-  //     onRefresh: _refreshUsers,
-  //     child: _users.isEmpty
-  //         ? const Center(child: Text('No users found.'))
-  //         : ListView.builder(
-  //             itemCount: _users.length,
-  //             itemBuilder: (context, index) {
-  //
-  //
-  //               final user = _users[index];
-  //               bool isActive = _activeUsers[user['userId']] ?? false;
-  //
-  //               bool getActiveStat = await _activeUserService.getActiveUsersStatus(
-  //                 userID: _loggedInUserId,
-  //               );
-  //
-  //
-  //               return ListTile(
-  //                 leading: Stack(
-  //                   children: [
-  //                     CircleAvatar(
-  //                       backgroundImage: NetworkImage(
-  //                         user['profileImageUrl'],
-  //                       ),
-  //                     ),
-  //                     Positioned(
-  //                       bottom: 0,
-  //                       right: 0,
-  //                       child: Container(
-  //                         width: 12,
-  //                         height: 12,
-  //                         decoration: BoxDecoration(
-  //                           color: getActiveStat ? Colors.green : Colors.red,
-  //                           shape: BoxShape.circle,
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //                 title: Text(user['name']),
-  //                 onTap: () async {
-  //                   String chatId = await _chatService.createOrGetChat(
-  //                     userId1: _loggedInUserId,
-  //                     name1: _loggedInUserData!['name'],
-  //                     userId2: user['userId'],
-  //                     name2: user['name'],
-  //                   );
-  //
-  //                   _navigationService.push(
-  //                     MaterialPageRoute(
-  //                       builder: (context) => ChatPage(
-  //                         loggedInUserName: _loggedInUserData!['name'],
-  //                         otherUserName: user['name'],
-  //                         chatId: chatId,
-  //                         currentUserId: _loggedInUserId,
-  //                         otherUserId: user['userId'],
-  //                       ),
-  //                     ),
-  //                   );
-  //                 },
-  //               );
-  //             },
-  //           ),
-  //   );
-  // }
 
   Widget _availableList() {
     return RefreshIndicator(

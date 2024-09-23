@@ -52,7 +52,19 @@ class _LoginState extends State<Login> {
             if (isLoading)
               const Expanded(
                 child: Center(
-                  child: CircularProgressIndicator(),
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(
+                      child: LinearProgressIndicator(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(6),
+                        ),
+                        backgroundColor: Colors.black,
+                        minHeight: 10,
+                        color: Colors.deepPurpleAccent,
+                      ),
+                    ),
+                  ),
                 ),
               ),
           ],

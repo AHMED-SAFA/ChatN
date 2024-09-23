@@ -1,5 +1,6 @@
 import 'package:chat/services/notification_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:get_it/get_it.dart';
 import '../services/auth_service.dart';
 import 'package:intl/intl.dart';
@@ -41,7 +42,6 @@ class _NotificationPageState extends State<NotificationPage> {
       setState(() {
         _isLoading = false;
       });
-      print("Error retrieving notifications: $e");
     }
   }
 
@@ -53,7 +53,9 @@ class _NotificationPageState extends State<NotificationPage> {
         title: const Text('Notifications'),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
           : _viewNotifications(),
     );
   }
@@ -92,8 +94,29 @@ class _NotificationPageState extends State<NotificationPage> {
                   setState(() {
                     _notifications.removeAt(index);
                   });
+                  showToast(
+                    'Notification Deleted!',
+                    context: context,
+                    animation: StyledToastAnimation.scale,
+                    reverseAnimation: StyledToastAnimation.fade,
+                    position: StyledToastPosition.bottom,
+                    animDuration: Duration(seconds: 1),
+                    duration: Duration(seconds: 4),
+                    curve: Curves.elasticOut,
+                    reverseCurve: Curves.linear,
+                  );
                 } catch (e) {
-                  print("Error deleting notification: $e");
+                  showToast(
+                    'Notification could not delete!',
+                    context: context,
+                    animation: StyledToastAnimation.scale,
+                    reverseAnimation: StyledToastAnimation.fade,
+                    position: StyledToastPosition.bottom,
+                    animDuration: Duration(seconds: 1),
+                    duration: Duration(seconds: 4),
+                    curve: Curves.elasticOut,
+                    reverseCurve: Curves.linear,
+                  );
                 }
               },
               icon: const Icon(Icons.delete),

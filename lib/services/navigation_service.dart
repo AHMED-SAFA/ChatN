@@ -1,6 +1,7 @@
-import 'package:chat/pages/gpt_page.dart';
+import 'package:chat/pages/gemini_page.dart';
 import 'package:chat/pages/home_page.dart';
 import 'package:chat/pages/login_page.dart';
+import 'package:chat/pages/openapi_page.dart';
 import 'package:chat/pages/profile_page.dart';
 import 'package:chat/pages/register_page.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,8 @@ class NavigationService {
     "/register": (context) => const RegisterPage(),
     "/profile": (context) => const ProfilePage(),
     "/notification": (context) => const NotificationPage(),
-    "/gpt": (context) => const GptPage(),
+    "/gemini": (context) => const GeminiPage(),
+    "/gpt": (context) => const OpenapiPage(),
   };
 
   GlobalKey<NavigatorState>? get navigatorKey {

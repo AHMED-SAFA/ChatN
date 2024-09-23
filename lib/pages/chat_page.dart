@@ -63,7 +63,9 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _getMessages() async {
     _chatService.getMessages(widget.chatId).listen((QuerySnapshot snapshot) {
+
       List<ChatMessage> loadedMessages = snapshot.docs.map((doc) {
+
         Message message = Message.fromJson(doc.data() as Map<String, dynamic>);
 
         if (message.messageType == MessageType.Text) {

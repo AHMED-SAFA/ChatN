@@ -52,7 +52,6 @@ class ChatService {
     }
   }
 
-
   Stream<QuerySnapshot> getMessages(String chatId) {
     return _firebaseFirestore
         .collection('chats')

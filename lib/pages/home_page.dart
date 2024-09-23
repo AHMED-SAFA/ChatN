@@ -165,7 +165,14 @@ class _HomeState extends State<Home> {
           ),
           ListTile(
             leading: const Icon(Icons.desktop_mac_sharp),
-            title: const Text('GPT'),
+            title: const Text('Gemini'),
+            onTap: () {
+              _navigationService.pushNamed('/gemini');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.desktop_mac_sharp),
+            title: const Text('Open Gpt'),
             onTap: () {
               _navigationService.pushNamed('/gpt');
             },

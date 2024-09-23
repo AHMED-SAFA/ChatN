@@ -1,5 +1,6 @@
 import 'package:chat/firebase_options.dart';
 import 'package:chat/services/auth_service.dart';
+import 'package:chat/services/bot_service.dart';
 import 'package:chat/services/chat_service.dart';
 import 'package:chat/services/cloud_service.dart';
 import 'package:chat/services/media_service.dart';
@@ -42,5 +43,9 @@ Future<void> registerServices() async {
 
   getIt.registerSingleton<ActiveUserService>(
     ActiveUserService(),
+  );
+
+  getIt.registerSingleton<BotService>(
+    BotService(),
   );
 }

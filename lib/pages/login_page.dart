@@ -193,6 +193,9 @@ class _LoginState extends State<Login> {
               _activeUserService.setActive(_authService.user!.uid);
               _navigationService.pushReplacementNamed("/home");
             } else {
+              setState(() {
+                isLoading = false;
+              });
               DelightToastBar(
                 builder: (context) => const ToastCard(
                   leading: Icon(

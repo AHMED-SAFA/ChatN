@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:chat/models/message.dart';
+import 'package:chat/services/activeUser_service.dart';
 import 'package:chat/services/auth_service.dart';
 import 'package:chat/services/chat_service.dart';
 import 'package:chat/services/media_service.dart';
@@ -33,6 +34,7 @@ class _ChatPageState extends State<ChatPage> {
   late AuthService _authService;
   late ChatService _chatService;
   late NotificationService _notificationService;
+  late ActiveUserService _activeUserService;
   late MediaService _mediaService;
   final GetIt _getIt = GetIt.instance;
   ChatUser? currentUser, otherUser;
@@ -43,6 +45,7 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     _authService = _getIt.get<AuthService>();
     _chatService = _getIt.get<ChatService>();
+    _activeUserService = _getIt.get<ActiveUserService>();
     _mediaService = _getIt.get<MediaService>();
     _notificationService = _getIt.get<NotificationService>();
     currentUser = ChatUser(
@@ -141,13 +144,20 @@ class _ChatPageState extends State<ChatPage> {
         message: message,
       );
 
-      await _notificationService.storeNotificationForMessage(
-        chatId: widget.chatId,
-        loggedInUserId: widget.currentUserId,
-        loggedInUserName: widget.loggedInUserName,
-        receiverId: widget.otherUserId,
+      // Check if the other user is active
+      bool isOtherUserActive = await _activeUserService.getActiveUsersStatus(
+        userID: widget.otherUserId,
       );
 
+      // Store notification only if the user is inactive
+      if (!isOtherUserActive) {
+        await _notificationService.storeNotificationForMessage(
+          chatId: widget.chatId,
+          loggedInUserId: widget.currentUserId,
+          loggedInUserName: widget.loggedInUserName,
+          receiverId: widget.otherUserId,
+        );
+      }
     } else {
       throw Exception("Failed to create message. Please try again.");
     }

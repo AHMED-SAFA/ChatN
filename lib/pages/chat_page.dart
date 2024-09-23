@@ -48,6 +48,7 @@ class _ChatPageState extends State<ChatPage> {
     _activeUserService = _getIt.get<ActiveUserService>();
     _mediaService = _getIt.get<MediaService>();
     _notificationService = _getIt.get<NotificationService>();
+
     currentUser = ChatUser(
       id: _authService.user!.uid,
       firstName: widget.loggedInUserName,

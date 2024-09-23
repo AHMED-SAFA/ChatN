@@ -52,6 +52,7 @@ class _HomeState extends State<Home> {
 
   Future<void> _fetchUsers() async {
     if (_loggedInUserData != null) {
+
       String department = _loggedInUserData!['department'];
 
       _users = await _cloudService.fetchRegisteredUsers(
@@ -84,16 +85,24 @@ class _HomeState extends State<Home> {
           _loggedInUserData != null
               ? '${_loggedInUserData!['name']}(${_loggedInUserData!['department']})'
               : 'Person',
+          style: const TextStyle(
+            color: Colors.white,
+          ),
         ),
+        backgroundColor: Colors.black,
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications),
+            icon: const Icon(
+              Icons.notifications,
+              color: Colors.white,
+            ),
             onPressed: () {
               _navigationService.pushNamed('/notification');
             },
           ),
         ],
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       drawer: _buildDrawer(),
       body: _isLoading
@@ -148,10 +157,17 @@ class _HomeState extends State<Home> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.account_circle),
+            leading: const Icon(Icons.manage_accounts),
             title: const Text('Profile'),
             onTap: () {
               _navigationService.pushNamed('/profile');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.desktop_mac_sharp),
+            title: const Text('GPT'),
+            onTap: () {
+              _navigationService.pushNamed('/gpt');
             },
           ),
           ListTile(

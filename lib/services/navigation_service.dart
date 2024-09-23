@@ -1,3 +1,4 @@
+import 'package:chat/pages/gpt_page.dart';
 import 'package:chat/pages/home_page.dart';
 import 'package:chat/pages/login_page.dart';
 import 'package:chat/pages/profile_page.dart';
@@ -13,6 +14,7 @@ class NavigationService {
     "/register": (context) => const RegisterPage(),
     "/profile": (context) => const ProfilePage(),
     "/notification": (context) => const NotificationPage(),
+    "/gpt": (context) => const GptPage(),
   };
 
   GlobalKey<NavigatorState>? get navigatorKey {
